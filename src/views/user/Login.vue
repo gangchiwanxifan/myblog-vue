@@ -100,7 +100,6 @@ export default {
             password: values.password,
           };
           user.password = md5(values.password);
-          console.log(user);
           request({
             url: "/user/login",
             method: "post",

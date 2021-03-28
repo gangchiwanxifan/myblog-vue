@@ -18,7 +18,7 @@ const user = {
     fetchUserInfo({ commit }, id) {
       return new Promise((resolve, reject) => {
         request({
-          url: "/user/getuser",
+          url: "/user/get_user",
           method: "post",
           data: { id },
         })

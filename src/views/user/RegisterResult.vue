@@ -19,13 +19,13 @@ export default {
   },
   computed: {
     msg() {
-      const v = (this.form && this.form.username) || "xxx";
+      const v = (this.form && this.form.nickname) || "xxx";
       return `您的账户：${v} --> 注册成功`;
     },
   },
   created() {
     this.form = this.$route.params;
-    this.description = `---账号：${this.$route.params.nickname}  ---  密码${this.$route.params.password}---`;
+    this.description = `---账号：${this.$route.params.username}  ---  密码${this.$route.params.password}---`;
   },
   methods: {
     goHomeHandle() {

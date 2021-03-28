@@ -9,7 +9,7 @@
               type="text"
               placeholder="账号"
               v-decorator="[
-                'accountName',
+                'username',
                 {
                   rules: [{ required: true, message: '请输入账号' }],
                   validateTrigger: ['change', 'blur'],
@@ -23,7 +23,7 @@
               type="text"
               placeholder="用户名"
               v-decorator="[
-                'username',
+                'nickname',
                 {
                   rules: [{ required: true, message: '请输入用户名' }],
                   validateTrigger: ['change', 'blur'],
@@ -106,6 +106,7 @@
 <script>
 import { scorePassword } from "@/utils/util";
 import request from "@/utils/request";
+import md5 from "md5";
 
 const levelNames = {
   0: "强度：太短",
@@ -195,13 +196,14 @@ export default {
             nickname: values.nickname,
             password: values.password,
           };
+          user.password = md5(values.password);
           request({
-            url: "/user/registered",
+            url: "/user/register",
             method: "post",
             data: user,
           }).then((res) => {
-            let id = res.data.data;
-            if (id) {
+            let flag = res.data.data;
+            if (flag) {
               this.$router.push({
                 name: "registerResult",
                 params: { ...values },
