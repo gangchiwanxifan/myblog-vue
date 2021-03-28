@@ -7,6 +7,33 @@ Vue.use(VueRouter);
 
 const routes = [
   {
+    path: "/user",
+    hideInMenu: true,
+    // component: { render: h => h("router-view") },
+    component: () => import("./layouts/UserLayout"),
+    children: [
+      {
+        path: "/user",
+        redirect: "/user/login",
+      },
+      {
+        path: "/user/login",
+        name: "login",
+        component: () => import("./views/user/Login"),
+      },
+      {
+        path: "/user/register",
+        name: "register",
+        component: () => import("./views/user/Register"),
+      },
+      {
+        path: "/user/result",
+        name: "registerResult",
+        component: () => import("./views/user/RegisterResult"),
+      },
+    ],
+  },
+  {
     path: "/",
     name: "Home",
     component: () => import("./views/About"),
