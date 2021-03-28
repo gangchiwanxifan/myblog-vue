@@ -78,6 +78,9 @@ import md5 from "md5";
 
 export default {
   data() {
+    this.$message.config({
+      maxCount: 1,
+    });
     this.form = this.$form.createForm(this);
     return {};
   },
@@ -100,6 +103,7 @@ export default {
             password: values.password,
           };
           user.password = md5(values.password);
+          this.$message.loading("登录中，请稍等...");
           request({
             url: "/user/login",
             method: "post",
@@ -108,7 +112,6 @@ export default {
             let id = res.data.data;
             if (id) {
               this.$store.dispatch("fetchUserInfo", id);
-              this.$message.loading("登录中，请稍等...", 1.5);
               setTimeout(() => {
                 this.$router.push("/");
               }, 2500);

@@ -35,8 +35,38 @@ const routes = [
   },
   {
     path: "/",
-    name: "Home",
-    component: () => import("./views/About"),
+    component: () => import("./layouts/BasicLayout"),
+    children: [
+      {
+        path: "/",
+        redirect: "/about",
+      },
+      {
+        path: "/about",
+        name: "about",
+        component: () => import("./views/About"),
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    component: () => import("./layouts/AdminLayout"),
+    children: [
+      {
+        path: "/admin",
+        redirect: "/admin/dashboard",
+      },
+      {
+        path: "/admin/dashboard",
+        name: "dashboard",
+        component: () => import("./views/admin/dashboard"),
+      },
+      {
+        path: "/admin/channel",
+        name: "channel",
+        component: () => import("./views/admin/channel"),
+      },
+    ],
   },
   {
     path: "*",
