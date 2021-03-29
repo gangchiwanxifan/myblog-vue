@@ -85,7 +85,7 @@ export default {
   mounted() {
     if (this.loginStatus) {
       this.nickname = this.userInfo.nickname;
-      this.avatar = this.userInfo.avatar ? this.userInfo.avatar : "/avatar.png";
+      this.avatar = this.userInfo.avatar;
     }
   },
   computed: {
@@ -110,10 +110,10 @@ export default {
       this.$router.push({ path: "/blog/edit" });
     },
     handleToCenter() {
-      this.$router.push({ path: "/account/center" });
+      this.$router.push({ path: `/center/${this.userInfo.userId}` });
     },
     handleToSettings() {
-      this.$router.push({ path: "/account/settings" });
+      this.$router.push({ path: "/settings" });
     },
     handleToAdmin() {
       this.$router.push({ path: "/admin" });

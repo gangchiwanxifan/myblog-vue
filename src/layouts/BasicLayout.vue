@@ -102,7 +102,7 @@ export default {
 }
 .basicLayout-content {
   position: relative;
-  margin: 24px;
+  // margin: 24px;
 }
 a-menu-item {
   font-size: 20px;

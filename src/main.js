@@ -8,6 +8,7 @@ import "./global.less"; // global style
 import VueCropper from "vue-cropper"; // 图片裁剪
 import mavonEditor from "mavon-editor";
 import "mavon-editor/dist/css/index.css";
+import "./permission"; // permission control
 
 Vue.config.productionTip = false;
 
