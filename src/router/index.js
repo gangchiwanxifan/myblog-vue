@@ -31,6 +31,10 @@ const routes = [
       ...blog,
       // 用户设置
       ...account,
+      {
+        path: "/test",
+        component: () => import("@/views/test/Test1"),
+      },
     ],
   },
   {

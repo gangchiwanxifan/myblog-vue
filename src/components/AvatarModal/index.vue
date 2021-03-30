@@ -3,7 +3,7 @@
     title="修改头像"
     :visible="visible"
     :maskClosable="false"
-    :width="800"
+    :width="modalWidth"
     :footer="null"
     @cancel="cancelHandel"
   >
@@ -14,7 +14,7 @@
           :img="options.img"
           :info="true"
           :autoCrop="options.autoCrop"
-          :autoCropWidth="options.autoCropWidth"
+          :autoCropWidth="CropWidth"
           :autoCropHeight="options.autoCropHeight"
           :fixedBox="options.fixedBox"
           @realTime="realTime"
@@ -22,7 +22,7 @@
         </vue-cropper>
       </a-col>
       <a-col :xs="24" :md="12" :style="{ height: '350px' }">
-        <div class="avatar-upload-preview">
+        <div class="avatar-upload-preview" :style="preStyle">
           <img :src="previews.url" :style="previews.img" />
         </div>
       </a-col>
@@ -60,6 +60,20 @@
 import request from "@/utils/request";
 
 export default {
+  props: {
+    modalWidth: {
+      type: Number,
+      default: 800,
+    },
+    CropWidth: {
+      type: Number,
+      default: 200,
+    },
+    preStyle: {
+      type: Object,
+      default: () => {},
+    },
+  },
   data() {
     return {
       visible: false,
@@ -143,7 +157,7 @@ export default {
   transform: translate(50%, -50%);
   width: 180px;
   height: 180px;
-  border-radius: 50%;
+  // border-radius: 50%;
   box-shadow: 0 0 4px #ccc;
   overflow: hidden;
 

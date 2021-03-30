@@ -61,12 +61,16 @@
       </a-col>
     </a-row>
 
-    <avatar-modal ref="modal" @ok="setavatar" />
+    <avatar-modal
+      :preStyle="{ borderRadius: '50%' }"
+      ref="modal"
+      @ok="setavatar"
+    />
   </div>
 </template>
 
 <script>
-import AvatarModal from "./AvatarModal";
+import AvatarModal from "@/components/AvatarModal";
 import request from "@/utils/request";
 
 export default {
