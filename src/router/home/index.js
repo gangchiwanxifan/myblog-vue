@@ -1,7 +1,9 @@
 export default [
   {
     path: "/",
-    redirect: "/about",
+    name: "home",
+    // redirect: "/about",
+    component: () => import("@/views/home"),
   },
   {
     path: "/about",

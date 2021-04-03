@@ -107,7 +107,7 @@ export default {
       this.avatar = "/avatar.png";
     },
     handleToEdit() {
-      this.$router.push({ path: "/blog/add" });
+      this.$router.push({ path: "/blog/edit" });
     },
     handleToCenter() {
       this.$router.push({ path: `/center/${this.userInfo.userId}` });

@@ -16,16 +16,20 @@
             <a-menu
               theme="light"
               mode="horizontal"
-              :default-selected-keys="['1']"
+              :selectedKeys="selectedKeys"
               :style="{ lineHeight: '55px' }"
             >
-              <a-menu-item key="1">
-                <a-icon type="compass" style="font-size: 17px" />
-                <span style="font-size: 17px">发现</span>
+              <a-menu-item key="/">
+                <router-link :to="{ name: 'home' }">
+                  <a-icon type="compass" style="font-size: 17px" />
+                  <span style="font-size: 17px">发现</span>
+                </router-link>
               </a-menu-item>
-              <a-menu-item key="2">
-                <a-icon type="table" style="font-size: 17px" />
-                <span style="font-size: 17px">栏目</span>
+              <a-menu-item key="/about">
+                <router-link :to="{ name: 'about' }">
+                  <a-icon type="table" style="font-size: 17px" />
+                  <span style="font-size: 17px">栏目</span>
+                </router-link>
               </a-menu-item>
             </a-menu>
           </div>
@@ -52,6 +56,28 @@ export default {
     Header,
     Footer,
   },
+  data() {
+    return {
+      // selectdKeys: [],
+    };
+  },
+  computed: {
+    selectedKeys: function () {
+      const routes = this.$route.matched.concat();
+      return [routes.pop().path];
+    },
+  },
+  methods: {
+    updateMenu() {
+      const routes = this.$route.matched.concat();
+      this.selectedKeys = [routes.pop().path];
+    },
+  },
+  // watch: {
+  //   $route() {
+  //     this.updateMenu();
+  //   },
+  // },
 };
 </script>
 
