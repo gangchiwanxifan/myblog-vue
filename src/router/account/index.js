@@ -31,6 +31,12 @@ export default [
         meta: { title: "我的钱包" },
         component: () => import("@/views/account/settings/page/BasicSettings"),
       },
+      {
+        path: "/settings/homepage",
+        name: "PageSettings",
+        meta: { title: "编辑主页" },
+        component: () => import("@/views/account/settings/page/BasicSettings"),
+      },
     ],
   },
 ];

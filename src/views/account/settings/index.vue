@@ -27,6 +27,11 @@
             <a-menu-item key="/settings/wallet">
               <router-link :to="{ name: 'MyWallet' }"> 我的钱包 </router-link>
             </a-menu-item>
+            <a-menu-item key="/settings/homepage">
+              <router-link :to="{ name: 'PageSettings' }">
+                编辑主页
+              </router-link>
+            </a-menu-item>
           </a-menu>
         </div>
         <div class="account-settings-info-right">

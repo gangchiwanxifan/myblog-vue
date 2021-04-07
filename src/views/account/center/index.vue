@@ -9,7 +9,9 @@
           </div>
           <div class="h-basic">
             <div>
-              <span id="h-name">71369754782_bili</span>
+              <span id="h-name"
+                >71369754782_bili <a-icon type="man" style="color: blue" />
+              </span>
             </div>
             <div class="h-basic-spacing">
               <span class="h-sign"> asdsafgsdgasdg </span>
@@ -22,15 +24,17 @@
       :bordered="false"
       :style="{ backgroundColor: 'transparent' }"
       :headStyle="{ backgroundColor: '#fff' }"
+      :bodyStyle="{ padding: '0px' }"
       :tab-list="tabListNoTitle"
       :active-tab-key="noTitleKey"
       @tabChange="(key) => onTabChange(key, 'noTitleKey')"
     >
-      <p v-if="noTitleKey === 'home'">主页</p>
-      <p v-else-if="noTitleKey === 'blog'">文章</p>
-      <p v-else-if="noTitleKey === 'catagory'">文集</p>
-      <p v-else-if="noTitleKey === 'follow'">关注</p>
-      <p v-else-if="noTitleKey === 'fans'">粉丝</p>
+      <home-page v-if="noTitleKey === 'home'"></home-page>
+      <article-page v-else-if="noTitleKey === 'blog'"></article-page>
+      <catagory-page v-else-if="noTitleKey === 'catagory'"></catagory-page>
+      <notice-page v-else-if="noTitleKey === 'notice'"></notice-page>
+      <follow-page v-else-if="noTitleKey === 'follow'"></follow-page>
+      <fans-page v-else-if="noTitleKey === 'fans'"></fans-page>
       <span slot="tabBarExtraContent">
         <a @click="onSideChange('follow')"><a-icon type="star" />我的关注</a>
         <a-divider type="vertical"></a-divider>
@@ -41,7 +45,24 @@
 </template>
 
 <script>
+import {
+  HomePage,
+  ArticlePage,
+  CatagoryPage,
+  NoticePage,
+  FollowPage,
+  FansPage,
+} from "./page";
+
 export default {
+  components: {
+    HomePage,
+    ArticlePage,
+    CatagoryPage,
+    NoticePage,
+    FollowPage,
+    FansPage,
+  },
   data() {
     return {
       bgImg: "/center.png",
@@ -58,6 +79,10 @@ export default {
         {
           key: "catagory",
           tab: "文集",
+        },
+        {
+          key: "notice",
+          tab: "通知",
         },
       ],
       noTitleKey: "home",
