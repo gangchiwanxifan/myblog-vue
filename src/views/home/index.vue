@@ -1,6 +1,7 @@
 <template>
   <div class="container-index" style="background-color: #fff">
     <div style="max-width: 1000px; margin: 0 auto">
+      <!-- <div>{{ blogList }}</div> -->
       <a-row :gutter="24">
         <a-col :span="16">
           <a-carousel autoplay style="padding: 12px 0px">
@@ -12,30 +13,36 @@
               item-layout="vertical"
               size="large"
               :pagination="pagination"
-              :data-source="listData"
+              :data-source="blogList"
             >
               <a-list-item slot="renderItem" key="item.title" slot-scope="item">
                 <img
                   slot="extra"
                   height="125px"
                   alt="logo"
-                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                  :src="item.blogAvatar"
                 />
                 <a-list-item-meta>
-                  <a slot="title" :href="item.href" class="list-title">{{
-                    item.title
-                  }}</a>
+                  <a
+                    slot="title"
+                    :href="'#/blog/' + item.blogId"
+                    class="list-title"
+                    >{{ item.blogTitle }}</a
+                  >
                   <template slot="description">
                     <span>
-                      <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
-                        >Ant Design</a-tag
+                      <a-tag
+                        v-for="tag in item.blogTags"
+                        :key="tag"
+                        :color="tagColor[Math.floor(Math.random() * 7)]"
+                        >{{ tag }}</a-tag
                       >
-                      <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
+                      <!-- <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
                         >设计语言</a-tag
                       >
                       <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
                         >蚂蚁金服</a-tag
-                      >
+                      > -->
                     </span>
                     <!-- <div class="description">
                       {{ item.description }}
@@ -43,13 +50,21 @@
                   </template>
                 </a-list-item-meta>
                 <div class="description">
-                  {{ item.description }}
+                  {{ item.blogDescription }}
                 </div>
                 <!--action-->
-                <template v-for="{ type, text } in actions" slot="actions">
-                  <span :key="type">
-                    <a-icon :type="type" style="margin-right: 8px" />
-                    {{ text }}
+                <template slot="actions">
+                  <span>
+                    <a-icon type="user" style="margin-right: 8px" />
+                    {{ item.nickname }}
+                  </span>
+                  <span>
+                    <a-icon type="heart" style="margin-right: 8px" />
+                    {{ item.favoriteCount }}
+                  </span>
+                  <span>
+                    <a-icon type="message" style="margin-right: 8px" />
+                    {{ item.commentCount }}
                   </span>
                 </template>
               </a-list-item>
@@ -85,6 +100,8 @@
 </template>
 
 <script>
+import request from "@/utils/request";
+
 const listData = [];
 for (let i = 0; i < 10; i++) {
   listData.push({
@@ -97,6 +114,7 @@ for (let i = 0; i < 10; i++) {
 export default {
   data() {
     return {
+      data: [],
       listData,
       pagination: {
         onChange: () => {
@@ -111,6 +129,39 @@ export default {
       ],
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
     };
+  },
+  mounted() {
+    this.getList();
+  },
+  computed: {
+    blogList() {
+      if (this.data) {
+        const list = this.data;
+        for (let i = 0; i < list.length; i++) {
+          list[i].blogTags = list[i].blogTags.split(",");
+          // console.log(list[i].blogTas);
+        }
+        return list;
+      } else {
+        return [];
+      }
+    },
+    // blogLink: function (blogId) {
+    //   const link = "#/blog/" + blogId;
+    //   return link;
+    // },
+  },
+  methods: {
+    getList() {
+      request({
+        url: "/blog/list",
+        method: "post",
+      }).then((res) => {
+        if (res.data.data) {
+          this.data = res.data.data;
+        }
+      });
+    },
   },
 };
 </script>

@@ -6,8 +6,8 @@ export default [
     component: () => import("@/views/home"),
   },
   {
-    path: "/about",
+    path: "/channel",
     name: "about",
-    component: () => import("@/views/About"),
+    component: () => import("@/views/home/channel"),
   },
 ];

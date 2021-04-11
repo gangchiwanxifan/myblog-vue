@@ -33,7 +33,10 @@
         <div class="page-right">
           <div class="channel-info">
             <div class="channel-info-left">
-              <img src="/channel.png" alt="" />
+              <img
+                :src="currentChannel ? currentChannel.channelAvatar : ''"
+                alt=""
+              />
             </div>
             <div class="channel-info-right">
               <div class="edit-btn-group">
@@ -44,83 +47,97 @@
                   >投稿</a-button
                 >
               </div>
-              <div class="title">标题</div>
-              <div class="description">还没有简介哦~</div>
+              <div class="title">
+                {{ currentChannel ? currentChannel.channelName : "栏目名称" }}
+              </div>
+              <div class="description">
+                {{
+                  currentChannel
+                    ? currentChannel.channelDescription
+                    : "栏目描述"
+                }}
+              </div>
             </div>
             <div class="clear"></div>
-            <a-tabs class="tabs" default-active-key="2">
-              <a-tab-pane key="1">
+            <a-tabs class="tabs" v-model="activeKey">
+              <a-tab-pane key="false">
                 <span class="tabs-item" slot="tab">
                   <a-icon type="file-text" theme="filled" />
                   最新收录
                 </span>
-                <a-list
-                  item-layout="vertical"
-                  size="large"
-                  :pagination="pagination"
-                  :data-source="listData"
-                >
-                  <a-list-item
-                    slot="renderItem"
-                    key="item.title"
-                    slot-scope="item"
-                  >
-                    <img
-                      slot="extra"
-                      height="125px"
-                      alt="logo"
-                      src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-                    />
-                    <a-list-item-meta>
-                      <a slot="title" :href="item.href" class="list-title">{{
-                        item.title
-                      }}</a>
-                      <template slot="description">
-                        <span>
-                          <a-tag
-                            :color="tagColor[Math.floor(Math.random() * 7)]"
-                            >Ant Design</a-tag
-                          >
-                          <a-tag
-                            :color="tagColor[Math.floor(Math.random() * 7)]"
-                            >设计语言</a-tag
-                          >
-                          <a-tag
-                            :color="tagColor[Math.floor(Math.random() * 7)]"
-                            >蚂蚁金服</a-tag
-                          >
-                        </span>
-                        <!-- <div class="description">
-                      {{ item.description }}
-                    </div> -->
-                      </template>
-                    </a-list-item-meta>
-                    <div class="description">
-                      {{ item.description }}
-                    </div>
-                    <!--action-->
-                    <template v-for="{ type, text } in actions" slot="actions">
-                      <span :key="type">
-                        <a-icon :type="type" style="margin-right: 8px" />
-                        {{ text }}
-                      </span>
-                    </template>
-                  </a-list-item>
-
-                  <!-- footer -->
-                  <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
-                <a-button>加载更多</a-button>
-              </div> -->
-                </a-list>
               </a-tab-pane>
-              <a-tab-pane key="2">
+              <a-tab-pane key="true">
                 <span class="tabs-item" slot="tab">
                   <a-icon type="fire" theme="filled" />
                   热门
                 </span>
-                热门
               </a-tab-pane>
             </a-tabs>
+            <a-list
+              item-layout="vertical"
+              size="large"
+              :pagination="pagination"
+              :data-source="blogList"
+            >
+              <a-list-item slot="renderItem" key="item.title" slot-scope="item">
+                <img
+                  slot="extra"
+                  height="125px"
+                  alt="logo"
+                  :src="item.blogAvatar"
+                />
+                <a-list-item-meta>
+                  <a
+                    slot="title"
+                    :href="'#/blog/' + item.blogId"
+                    class="list-title"
+                    >{{ item.blogTitle }}</a
+                  >
+                  <template slot="description">
+                    <span>
+                      <a-tag
+                        v-for="tag in item.blogTags"
+                        :key="tag"
+                        :color="tagColor[Math.floor(Math.random() * 7)]"
+                        >{{ tag }}</a-tag
+                      >
+                      <!-- <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
+                        >设计语言</a-tag
+                      >
+                      <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
+                        >蚂蚁金服</a-tag
+                      > -->
+                    </span>
+                    <!-- <div class="description">
+                      {{ item.description }}
+                    </div> -->
+                  </template>
+                </a-list-item-meta>
+                <div class="description">
+                  {{ item.blogDescription }}
+                </div>
+                <!--action-->
+                <template slot="actions">
+                  <span>
+                    <a-icon type="user" style="margin-right: 8px" />
+                    {{ item.nickname }}
+                  </span>
+                  <span>
+                    <a-icon type="heart" style="margin-right: 8px" />
+                    {{ item.favoriteCount }}
+                  </span>
+                  <span>
+                    <a-icon type="message" style="margin-right: 8px" />
+                    {{ item.commentCount }}
+                  </span>
+                </template>
+              </a-list-item>
+
+              <!-- footer -->
+              <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
+                <a-button>加载更多</a-button>
+              </div> -->
+            </a-list>
           </div>
         </div>
       </div>
@@ -131,39 +148,49 @@
 <script>
 import request from "@/utils/request";
 
-const listData = [];
-for (let i = 0; i < 10; i++) {
-  listData.push({
-    href: "#/blog/1",
-    title: `测试文章ant design vue part ${i}`,
-    description:
-      "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-  });
-}
-
 export default {
   data() {
     return {
       data: [],
+      activeKey: "false",
       selectedKeys: [],
-      listData,
+      listData: [],
       pagination: {
         onChange: () => {
           document.documentElement.scrollTop = 200;
         },
         pageSize: 5,
       },
-      actions: [
-        { type: "user", text: "gcwxf" },
-        { type: "heart", text: "156" },
-        { type: "message", text: "2" },
-      ],
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
     };
   },
   mounted() {
     this.getList();
     // console.log(this.data);
+  },
+  computed: {
+    currentChannel: function () {
+      if (this.data) {
+        const channel = this.data.find(
+          (channel) => channel.channelId == this.selectedKeys
+        );
+        return channel;
+      } else {
+        return {};
+      }
+    },
+    blogList: function () {
+      if (this.listData) {
+        const list = this.listData;
+        for (let i = 0; i < list.length; i++) {
+          list[i].blogTags = list[i].blogTags.split(",");
+          // console.log(list[i].blogTas);
+        }
+        return list;
+      } else {
+        return [];
+      }
+    },
   },
   methods: {
     updateMenu(selectedKey) {
@@ -173,7 +200,7 @@ export default {
     },
     // 获取栏目列表
     getList() {
-      this.loading = true;
+      // this.loading = true;
       request({
         url: "/channel/list",
         method: "get",
@@ -183,11 +210,34 @@ export default {
         // this.loading = false;
       });
     },
+    // 获取文章列表
+    getBlogs(id, flag) {
+      request({
+        url: "/blog/list_channel",
+        method: "post",
+        data: { channelId: id, sortByViews: flag },
+      }).then((res) => {
+        if (res.data.data) {
+          this.listData = res.data.data;
+          // console.log(this.listData);
+        }
+      });
+    },
   },
   watch: {
     data() {
       if (this.data) {
         this.selectedKeys = [this.data[0].channelId];
+      }
+    },
+    selectedKeys() {
+      if (this.selectedKeys) {
+        this.getBlogs(...this.selectedKeys, this.activeKey);
+      }
+    },
+    activeKey() {
+      if (this.selectedKeys) {
+        this.getBlogs(...this.selectedKeys, this.activeKey);
       }
     },
   },

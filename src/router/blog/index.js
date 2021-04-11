@@ -13,6 +13,6 @@ export default [
 
   {
     path: "blog/:id",
-    component: () => import("@/views/test/Test1"),
+    component: () => import("@/views/blog/Detail"),
   },
 ];

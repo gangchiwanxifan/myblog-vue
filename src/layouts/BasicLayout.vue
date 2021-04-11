@@ -25,7 +25,7 @@
                   <span style="font-size: 17px">发现</span>
                 </router-link>
               </a-menu-item>
-              <a-menu-item key="/about">
+              <a-menu-item key="/channel">
                 <router-link :to="{ name: 'about' }">
                   <a-icon type="table" style="font-size: 17px" />
                   <span style="font-size: 17px">栏目</span>
