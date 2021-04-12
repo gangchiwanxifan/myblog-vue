@@ -66,6 +66,10 @@
                     <a-icon type="message" style="margin-right: 8px" />
                     {{ item.commentCount }}
                   </span>
+                  <span>
+                    <a-icon type="eye" style="margin-right: 8px" />
+                    {{ item.blogViews }}
+                  </span>
                 </template>
               </a-list-item>
 

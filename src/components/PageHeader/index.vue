@@ -10,8 +10,8 @@
         </div>
         <div class="header-heading">
           <span class="header-heading-title">{{ management }}</span>
-          <slot></slot>
         </div>
+        <slot></slot>
       </div>
     </div>
   </div>

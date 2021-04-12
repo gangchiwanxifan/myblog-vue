@@ -33,7 +33,11 @@ const routes = [
       ...account,
       {
         path: "/test",
-        component: () => import("@/views/test/Test1"),
+        component: () => import("@/views/test/Test2"),
+      },
+      {
+        path: "/test2",
+        component: () => import("@/views/test/Test3"),
       },
     ],
   },

@@ -1,5 +1,15 @@
 <template>
   <div class="page-container" @click="closeSel">
+    <div class="_3Pnjry">
+      <div class="_1pUUKr">
+        <div class="_2VdqdF"><a-icon type="like" theme="filled" /></div>
+        <div class="P63n6G">点赞</div>
+      </div>
+      <div class="_1pUUKr">
+        <div class="_2VdqdF">￥</div>
+        <div class="P63n6G">赞赏</div>
+      </div>
+    </div>
     <a-card class="page-container-card" :bordered="false">
       <div class="page-title">
         <a class="favorite"><a-icon type="plus" /> 收藏</a>
@@ -42,30 +52,59 @@
         v-for="tag in tags"
         :key="tag"
         :color="tagColor[Math.floor(Math.random() * 7)]"
-        >{{ tag }}</a-tag
       >
+        {{ tag }}
+      </a-tag>
       <a-divider />
       <div>
-        <a-button class="pay-btn" shape="round" type="primary"
-          >赞赏支持</a-button
-        >
+        <div class="follow-box">
+          <img src="/avatar.png" alt="" />
+          <div class="follow-content">
+            <div class="follow-user">yonghuming</div>
+            <div class="follow-info">ta很懒....</div>
+          </div>
+          <div class="follow-btn">
+            <a-button @click="show">关注</a-button>
+          </div>
+        </div>
+        <span class="pay-info">"小礼物走一走，来Simple Blog关注我"</span>
+        <a-button id="pay-btn" class="pay-btn" shape="round" type="primary">
+          ￥赞赏支持
+        </a-button>
       </div>
     </a-card>
     <!-- 评论部分 -->
     <a-card class="comment-card" :bordered="false">
       <h2>评论</h2>
       <a-comment>
-        <img class="comment-avatar" slot="avatar" src="/avatar.png" />
+        <img class="comment-avatar" slot="avatar" :src="userInfo.avatar" />
         <div slot="content">
           <a-textarea
             id="emojiInput"
             class="comment-content"
-            placeholder="发一条友善的评论"
+            :placeholder="placeholder"
             :auto-size="{ minRows: 3, maxRows: 5 }"
             :rows="4"
             v-model="value"
           />
-          <a-button type="primary" class="comment-submit">发表评论</a-button>
+          <a-button
+            v-if="!this.replyCommentId"
+            type="primary"
+            class="comment-btn comment-submit-btn"
+            @click="handleComment"
+            >发表评论</a-button
+          >
+          <span v-else>
+            <a-button
+              type="primary"
+              class="comment-btn comment-submit-btn"
+              @click="handleComment"
+              >回复</a-button
+            >
+            <a-button type="danger" class="comment-btn" @click="cancelReply"
+              >取消</a-button
+            >
+          </span>
           <div>
             <a-button id="show-btn" class="emoji-btn" @click="showEmoji"
               ><a-icon type="smile" />表情</a-button
@@ -83,6 +122,13 @@
           </div>
         </div>
       </a-comment>
+      <div>
+        <div v-if="!hasComment" class="no-reply">看看下面~来抢沙发吧</div>
+        <div v-else>
+          <blog-comments @reply="reply" :comments="comments" />
+          <div class="no-reply">没有更多评论</div>
+        </div>
+      </div>
     </a-card>
   </div>
 </template>
@@ -90,21 +136,27 @@
 <script>
 import request from "@/utils/request";
 import { VEmojiPicker } from "v-emoji-picker";
+import BlogComments from "@/components/BlogComments/index.vue";
 
 export default {
   components: {
     VEmojiPicker,
+    BlogComments,
   },
   data() {
     return {
       value: "",
       emojiVisible: false,
       blogDetail: {},
+      placeholder: "发一条友善的评论",
+      comments: [],
+      replyCommentId: "",
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
     };
   },
   mounted() {
-    this.getBlog(this.$route.params.id);
+    this.getBlog(this.blogId);
+    this.getComments(this.blogId);
     // console.log(this.$route.params.id);
   },
   computed: {
@@ -115,8 +167,25 @@ export default {
         return null;
       }
     },
+    userInfo: function () {
+      return this.$store.state.user.userInfo;
+    },
+    blogId: function () {
+      return this.$route.params.id;
+    },
+    hasComment: function () {
+      if (this.comments.length) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   methods: {
+    show() {
+      console.log(this.comments);
+      console.log(this.hasComment);
+    },
     getBlog(blogId) {
       request({
         url: "/blog/detail",
@@ -125,6 +194,17 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.blogDetail = res.data.data;
+        }
+      });
+    },
+    getComments(blogId) {
+      request({
+        url: `/comment/${blogId}`,
+        methods: "post",
+      }).then((res) => {
+        if (res.data.data) {
+          this.comments = res.data.data;
+          // console.log(res.data.data);
         }
       });
     },
@@ -158,6 +238,51 @@ export default {
       elInput.selectionEnd = start + emoji.data.length;
       this.value = result; // 赋值(注意这里一定要赋值给表情输入框绑定的那个值)
     },
+    // 发表评论
+    handleComment() {
+      if (this.value) {
+        const data = {
+          commentBlogId: this.blogId,
+          commentUserId: this.userInfo.userId,
+          commentContent: this.value,
+          parentId: this.replyCommentId,
+        };
+        request({
+          url: "/comment/save",
+          method: "post",
+          data: data,
+        }).then((res) => {
+          if (res.data.data) {
+            this.$message.success("评论成功~");
+            this.resetComment();
+            this.getComments(this.blogId);
+          } else {
+            this.$message.error("发生未知错误");
+          }
+        });
+      } else {
+        this.$message.warning("请输入评论内容~");
+      }
+    },
+    reply(comment) {
+      // console.log(comment);
+      document.getElementById("emojiInput").scrollIntoView({
+        behavior: "smooth", // 默认 auto
+        block: "center", // 默认 center
+        inline: "nearest", // 默认 nearest
+      });
+      this.placeholder = "回复 @" + comment.nickname + ":";
+      this.replyCommentId = comment.commentId;
+    },
+    cancelReply() {
+      // console.log("取消回复");
+      this.resetComment();
+    },
+    resetComment() {
+      this.placeholder = "发一条友善的评论";
+      this.replyCommentId = "";
+      this.value = "";
+    },
   },
 };
 </script>
@@ -166,6 +291,33 @@ export default {
 .page-container {
   margin: 20px auto;
   max-width: 1200px;
+  ._3Pnjry {
+    position: fixed;
+    z-index: 98;
+    top: 240px;
+    left: calc((100vw - 1200px) / 2 - 75px);
+  }
+  ._1pUUKr,
+  ._2VdqdF {
+    display: flex;
+    align-items: center;
+  }
+  ._1pUUKr {
+    position: relative;
+    flex-direction: column;
+    margin-bottom: 25px;
+    cursor: pointer;
+    color: #969696;
+  }
+  ._2VdqdF {
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 5%);
+    background-color: #fff;
+  }
   // width: 200px;
   // height: 200px;
   // background-color: #fff;
@@ -210,10 +362,51 @@ export default {
       border: none;
       z-index: 1000 !important;
     }
+    .pay-info {
+      display: block;
+      width: 285px;
+      margin: 0 auto;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: #404040;
+    }
     .pay-btn {
-      width: 300px;
+      width: 210px;
       display: block;
       margin: 0 auto;
+      height: 45px;
+      font-size: 16px;
+      background-color: #00a1d6;
+      border: 1px solid #00a1d6;
+    }
+    .follow-box {
+      display: flex;
+      position: relative;
+      width: 60%;
+      background-color: #fafafa;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin: 0 auto 16px;
+      img {
+        height: 50px;
+      }
+      .follow-content {
+        padding-left: 20px;
+      }
+      .follow-info {
+        color: #969696;
+      }
+      .follow-user {
+        color: #404040;
+        font-size: 16px;
+        padding-bottom: 5px;
+      }
+      .follow-btn {
+        vertical-align: center;
+        margin-left: auto;
+        margin-top: 9px;
+      }
     }
   }
 
@@ -227,19 +420,23 @@ export default {
     margin-top: 15px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 10%);
     .comment-avatar {
-      margin: 20px 20px 0 0;
-      width: 48px;
-      height: 48px;
+      margin: 5px 20px 0 0;
+      width: 60px;
+      height: 60px;
     }
     .comment-content {
       width: 60%;
       font-size: 16px;
     }
-    .comment-submit {
+    .comment-btn {
       margin-left: 10px;
       height: 82px;
       width: 82px;
       padding: 0px;
+    }
+    .comment-submit-btn {
+      background-color: #00a1d6;
+      border: 1px solid #00a1d6;
     }
     .emoji-btn {
       margin-top: 5px;
@@ -260,6 +457,13 @@ export default {
         min-width: 325px;
       }
     }
+  }
+  .no-reply {
+    width: 60%;
+    color: #99a2aa;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 12px;
   }
 }
 </style>
