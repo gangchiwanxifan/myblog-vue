@@ -27,14 +27,22 @@
           class="rank-item"
           v-for="(item, index) in blogList"
           :key="item.blogId"
-          @click="$router.push({ path: `/blog/${item.blogId}` })"
         >
           <span
             class="rank-index"
             :class="{ 'rank-color-A': index < 3, 'rank-color-B': index >= 3 }"
             >{{ index + 1 }}</span
           >
-          <a class="rank-title">{{ item.blogTitle | title }}</a>
+          <a-tooltip placement="right">
+            <template slot="title">
+              <span>{{ item.blogTitle }}</span>
+            </template>
+            <a
+              class="rank-title"
+              @click="$router.push({ path: `/blog/${item.blogId}` })"
+              >{{ item.blogTitle | title }}</a
+            >
+          </a-tooltip>
         </div>
       </div>
     </div>
