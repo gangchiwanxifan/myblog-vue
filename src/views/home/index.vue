@@ -25,7 +25,7 @@
                 <a-list-item-meta>
                   <a
                     slot="title"
-                    :href="'#/blog/' + item.blogId"
+                    @click="$router.push({ path: `/blog/${item.blogId}` })"
                     class="list-title"
                     >{{ item.blogTitle }}</a
                   >
@@ -37,12 +37,6 @@
                         :color="tagColor[Math.floor(Math.random() * 7)]"
                         >{{ tag }}</a-tag
                       >
-                      <!-- <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
-                        >设计语言</a-tag
-                      >
-                      <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
-                        >蚂蚁金服</a-tag
-                      > -->
                     </span>
                     <!-- <div class="description">
                       {{ item.description }}
@@ -55,19 +49,27 @@
                 <!--action-->
                 <template slot="actions">
                   <span>
-                    <a-icon type="user" style="margin-right: 8px" />
+                    <a-avatar
+                      :src="item.avatar"
+                      :size="24"
+                      style="margin-right: 8px"
+                    />
+                    <!-- <a-icon type="user" style="margin-right: 8px" /> -->
                     {{ item.nickname }}
                   </span>
                   <span>
-                    <a-icon type="heart" style="margin-right: 8px" />
+                    <!-- <a-icon type="heart" style="margin-right: 8px" /> -->
+                    <icon-font type="icon-xihuan" style="margin-right: 8px" />
                     {{ item.favoriteCount }}
                   </span>
                   <span>
-                    <a-icon type="message" style="margin-right: 8px" />
+                    <!-- <a-icon type="message" style="margin-right: 8px" /> -->
+                    <icon-font type="icon-pinglun" style="margin-right: 8px" />
                     {{ item.commentCount }}
                   </span>
                   <span>
-                    <a-icon type="eye" style="margin-right: 8px" />
+                    <!-- <a-icon type="eye" style="margin-right: 8px" /> -->
+                    <icon-font type="icon-xianshi" style="margin-right: 8px" />
                     {{ item.blogViews }}
                   </span>
                 </template>
@@ -81,22 +83,7 @@
           </a-card>
         </a-col>
         <a-col :span="8">
-          <a-card :bordered="false">
-            <div class="side-title"><a-icon type="sound" /> 网站公告</div>
-            <div>content...</div>
-            <div>content...</div>
-            <div>content...</div>
-            <a-divider></a-divider>
-            <div class="side-title"><a-icon type="fire" /> 热门文章</div>
-            <div>content...</div>
-            <div>content...</div>
-            <div>content...</div>
-            <a-divider></a-divider>
-            <div class="side-title"><a-icon type="link" /> 友情链接</div>
-            <div>content...</div>
-            <div>content...</div>
-            <div>content...</div>
-          </a-card>
+          <side-content />
         </a-col>
       </a-row>
     </div>
@@ -105,6 +92,7 @@
 
 <script>
 import request from "@/utils/request";
+import SideContent from "./SideContent";
 
 const listData = [];
 for (let i = 0; i < 10; i++) {
@@ -116,6 +104,9 @@ for (let i = 0; i < 10; i++) {
   });
 }
 export default {
+  components: {
+    SideContent,
+  },
   data() {
     return {
       data: [],

@@ -117,6 +117,7 @@ export default {
       position: relative;
       width: 60px;
       height: 60px;
+      border-radius: 50%;
       flex-shrink: 0;
       margin-right: 20px;
     }

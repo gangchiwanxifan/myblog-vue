@@ -20,7 +20,7 @@ const user = {
         request({
           url: "/user/get_user",
           method: "post",
-          data: { id },
+          data: { id: id },
         })
           .then((res) => {
             const result = res.data.data;

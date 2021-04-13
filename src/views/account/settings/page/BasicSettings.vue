@@ -21,14 +21,18 @@
               v-decorator="[
                 'sex',
                 {
-                  initialValue: userInfo.sex ? userInfo.sex : 3,
+                  initialValue: userInfo.sex + 1 ? userInfo.sex : 0,
                 },
               ]"
             >
               <a-radio :value="1"> 男 </a-radio>
               <a-radio :value="2"> 女 </a-radio>
-              <a-radio :value="3"> 保密 </a-radio>
+              <a-radio :value="0"> 保密 </a-radio>
             </a-radio-group>
+          </a-form-item>
+          <a-form-item label="标签">
+            <!-- <div>{{ stringTags }}</div> -->
+            <blog-tags :tags="userTags" @updateTags="updateTags" />
           </a-form-item>
           <a-form-item label="个人简介">
             <a-textarea
@@ -72,16 +76,22 @@
 <script>
 import AvatarModal from "@/components/AvatarModal";
 import request from "@/utils/request";
+import BlogTags from "@/components/BlogTags";
 
 export default {
   components: {
     AvatarModal,
+    BlogTags,
   },
   data() {
     this.form = this.$form.createForm(this);
+    this.$message.config({
+      maxCount: 1,
+    });
     return {
       userInfo: {},
       img: "/avatar.jpg",
+      userTags: [],
     };
   },
   mounted() {
@@ -89,30 +99,47 @@ export default {
     this.img = this.$store.state.user.userInfo.avatar
       ? this.$store.state.user.userInfo.avatar
       : "/avatar.jpg";
+    this.userTags = this.$store.state.user.userInfo.tags
+      ? this.$store.state.user.userInfo.tags.split(",")
+      : [];
+  },
+  computed: {
+    stringTags: function () {
+      if (this.userTags) {
+        return this.userTags.join();
+      } else {
+        return "";
+      }
+    },
   },
   methods: {
+    // 上传头像
     setavatar(url) {
       let user = {
-        id: this.userInfo.id,
+        userId: this.userInfo.userId,
         avatar: url,
       };
-      console.log(user);
       request({
         url: "/user/update",
         method: "post",
         data: user,
       }).then((res) => {
-        let user = res.data.data;
-        this.$store.dispatch("fetchUserInfo", user.id);
-        this.$message.success("上传成功");
-        this.img = url;
+        if (res.data.data) {
+          this.$store.dispatch("fetchUserInfo", user.userId);
+          this.$message.success("上传成功");
+          this.img = url;
+        } else {
+          console.log("请求错误，很烦~");
+        }
       });
     },
     handleSubmit() {
+      this.$message.loading("正在更新", 0);
       this.form.validateFields((err, values) => {
         if (!err) {
           let user = {
-            id: this.userInfo.id,
+            userId: this.userInfo.userId,
+            tags: this.stringTags,
             ...values,
           };
           request({
@@ -120,12 +147,19 @@ export default {
             method: "post",
             data: user,
           }).then((res) => {
-            let user = res.data.data;
-            this.$store.dispatch("fetchUserInfo", user.id);
-            this.$message.success("更新成功");
+            if (res.data.data) {
+              this.$store.dispatch("fetchUserInfo", user.userId);
+              this.$message.success("更新成功", 1);
+            } else {
+              console.log("请求错误，很烦~");
+            }
           });
         }
       });
+    },
+    // 更新标签
+    updateTags(tags) {
+      this.userTags = tags;
     },
   },
 };

@@ -6,13 +6,13 @@ export default [
   },
 
   {
-    path: "blog/draft",
+    path: "/blog/draft",
     name: "draft",
     component: () => import("@/views/blog/Draft"),
   },
 
   {
-    path: "blog/:id",
+    path: "/blog/:id",
     component: () => import("@/views/blog/Detail"),
   },
 ];

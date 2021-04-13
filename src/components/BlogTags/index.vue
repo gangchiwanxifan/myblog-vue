@@ -25,7 +25,7 @@
     <a-tag
       class="tags"
       v-else
-      style="background: #fff; borderstyle: dashed"
+      style="background: #fff; border-style: dashed; cursor: pointer"
       @click="showInput"
     >
       <a-icon type="plus" /> New Tag
@@ -88,5 +88,6 @@ export default {
   line-height: 26px;
   text-align: center;
   font-size: 16px;
+  margin-bottom: 10px;
 }
 </style>

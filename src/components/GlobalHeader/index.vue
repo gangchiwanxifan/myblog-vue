@@ -1,8 +1,12 @@
 <template>
   <div>
     <div v-if="loginStatus">
-      <a-button class="edit-button" shape="round" @click="handleToEdit"
-        ><a-icon type="highlight" />写文章</a-button
+      <a-button
+        class="edit-button"
+        type="primary"
+        shape="round"
+        @click="handleToEdit"
+        ><icon-font type="icon-sign-review-full" />写文章</a-button
       >
       <a-dropdown placement="bottomRight" class="right-dropdown">
         <span class="ant-pro-account-avatar">
@@ -98,7 +102,7 @@ export default {
   },
   watch: {
     userInfo: function (val) {
-      this.accountName = val.accountName;
+      this.nickname = val.nickname;
       this.avatar = val.avatar;
     },
   },
@@ -159,7 +163,7 @@ div {
   color: rgba(0, 0, 0, 0.65);
 }
 .edit-button {
-  background-color: rgba(248, 80, 13, 0.062);
+  // background-color: rgba(248, 80, 13, 0.062);
   vertical-align: middle;
 }
 .login-btn {

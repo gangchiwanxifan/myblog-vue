@@ -8,6 +8,7 @@
     @cancel="cancelHandel"
   >
     <a-row>
+      <!-- <img :src="previews.url" :style="previews.img" /> -->
       <a-col :xs="24" :md="12" :style="{ height: '350px' }">
         <vue-cropper
           ref="cropper"
@@ -107,8 +108,11 @@ export default {
       this.$refs.cropper.rotateRight();
     },
     beforeUpload(file) {
+      // console.log(file.type);
       const isJpgOrPng =
-        file.type === "image/jpeg" || file.type === "image/png";
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/webp";
       if (!isJpgOrPng) {
         this.$message.error("You can only upload JPG file!");
       } else {
@@ -153,10 +157,12 @@ export default {
 <style lang="less" scoped>
 .avatar-upload-preview {
   position: absolute;
-  top: 50%;
-  transform: translate(50%, -50%);
-  width: 180px;
-  height: 180px;
+  // top: 50%;
+  // transform: translate(50%, -50%);
+  top: 22%;
+  left: 22%;
+  width: 200px;
+  height: 200px;
   // border-radius: 50%;
   box-shadow: 0 0 4px #ccc;
   overflow: hidden;

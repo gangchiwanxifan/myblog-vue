@@ -132,7 +132,7 @@
     <avatar-modal
       :CropWidth="300"
       :modalWidth="900"
-      :preStyle="{ width: '270px' }"
+      :preStyle="{ width: '300px' }"
       ref="modal"
       @ok="setavatar"
     />
