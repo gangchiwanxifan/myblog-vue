@@ -33,7 +33,7 @@ const routes = [
       ...account,
       {
         path: "/test",
-        component: () => import("@/views/test/Test2"),
+        component: () => import("@/views/test/Test4"),
       },
       {
         path: "/test2",
@@ -46,6 +46,13 @@ const routes = [
     component: () => import("@/views/exception/404"),
   },
 ];
+
+// 解决路由跳转重复会报错
+const originalPush = VueRouter.prototype.push;
+
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch((err) => err);
+};
 
 const router = new VueRouter({
   // mode: "history",

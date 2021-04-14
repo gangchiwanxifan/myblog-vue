@@ -33,6 +33,7 @@
               </a-menu-item>
             </a-menu>
           </div>
+          <search-box class="search-box" />
           <div class="ant-global-header-index-right">
             <Header />
           </div>
@@ -51,10 +52,13 @@
 <script>
 import Header from "../components/GlobalHeader";
 import Footer from "../components/GlobalFooter";
+import SearchBox from "@/components/SearchBox";
+
 export default {
   components: {
     Header,
     Footer,
+    SearchBox,
   },
   data() {
     return {
@@ -100,6 +104,9 @@ export default {
         height: 100%;
         margin-left: auto;
         overflow: hidden;
+      }
+      .search-box {
+        margin-left: 30px;
       }
       .ant-top-nav-header-left {
         float: left;

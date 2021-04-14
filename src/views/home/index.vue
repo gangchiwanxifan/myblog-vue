@@ -9,77 +9,89 @@
             <img src="/swiper/img1.png" alt="图片加载失败" />
           </a-carousel>
           <a-card :bordered="false" :bodyStyle="{ padding: '12px 0px' }">
-            <a-list
-              item-layout="vertical"
-              size="large"
-              :pagination="pagination"
-              :data-source="blogList"
-            >
-              <a-list-item slot="renderItem" key="item.title" slot-scope="item">
-                <img
-                  slot="extra"
-                  height="125px"
-                  alt="logo"
-                  :src="item.blogAvatar"
-                />
-                <a-list-item-meta>
-                  <a
-                    slot="title"
-                    @click="$router.push({ path: `/blog/${item.blogId}` })"
-                    class="list-title"
-                    >{{ item.blogTitle }}</a
-                  >
-                  <template slot="description">
-                    <span>
-                      <a-tag
-                        v-for="tag in item.blogTags"
-                        :key="tag"
-                        :color="tagColor[Math.floor(Math.random() * 7)]"
-                        >{{ tag }}</a-tag
-                      >
-                    </span>
-                    <!-- <div class="description">
+            <a-spin :spinning="loading" size="large">
+              <a-list
+                item-layout="vertical"
+                size="large"
+                :pagination="pagination"
+                :data-source="blogList"
+              >
+                <a-list-item
+                  slot="renderItem"
+                  key="item.title"
+                  slot-scope="item"
+                >
+                  <img
+                    slot="extra"
+                    height="125px"
+                    alt="logo"
+                    :src="item.blogAvatar"
+                  />
+                  <a-list-item-meta>
+                    <a
+                      slot="title"
+                      @click="$router.push({ path: `/blog/${item.blogId}` })"
+                      class="list-title"
+                      >{{ item.blogTitle }}</a
+                    >
+                    <template slot="description">
+                      <span>
+                        <a-tag
+                          v-for="tag in item.blogTags"
+                          :key="tag"
+                          :color="tagColor[Math.floor(Math.random() * 7)]"
+                          >{{ tag }}
+                        </a-tag>
+                      </span>
+                      <!-- <div class="description">
                       {{ item.description }}
                     </div> -->
+                    </template>
+                  </a-list-item-meta>
+                  <div class="description">
+                    {{ item.blogDescription }}
+                  </div>
+                  <!--action-->
+                  <template slot="actions">
+                    <span>
+                      <a-avatar
+                        :src="item.avatar"
+                        :size="24"
+                        style="margin-right: 8px"
+                      />
+                      <!-- <a-icon type="user" style="margin-right: 8px" /> -->
+                      {{ item.nickname }}
+                    </span>
+                    <span>
+                      <!-- <a-icon type="heart" style="margin-right: 8px" /> -->
+                      <icon-font type="icon-xihuan" style="margin-right: 8px" />
+                      {{ item.favoriteCount }}
+                    </span>
+                    <span>
+                      <!-- <a-icon type="message" style="margin-right: 8px" /> -->
+                      <icon-font
+                        type="icon-pinglun"
+                        style="margin-right: 8px"
+                      />
+                      {{ item.commentCount }}
+                    </span>
+                    <span>
+                      <!-- <a-icon type="eye" style="margin-right: 8px" /> -->
+                      <icon-font
+                        type="icon-xianshi"
+                        style="margin-right: 8px"
+                      />
+                      {{ item.blogViews }}
+                    </span>
                   </template>
-                </a-list-item-meta>
-                <div class="description">
-                  {{ item.blogDescription }}
-                </div>
-                <!--action-->
-                <template slot="actions">
-                  <span>
-                    <a-avatar
-                      :src="item.avatar"
-                      :size="24"
-                      style="margin-right: 8px"
-                    />
-                    <!-- <a-icon type="user" style="margin-right: 8px" /> -->
-                    {{ item.nickname }}
-                  </span>
-                  <span>
-                    <!-- <a-icon type="heart" style="margin-right: 8px" /> -->
-                    <icon-font type="icon-xihuan" style="margin-right: 8px" />
-                    {{ item.favoriteCount }}
-                  </span>
-                  <span>
-                    <!-- <a-icon type="message" style="margin-right: 8px" /> -->
-                    <icon-font type="icon-pinglun" style="margin-right: 8px" />
-                    {{ item.commentCount }}
-                  </span>
-                  <span>
-                    <!-- <a-icon type="eye" style="margin-right: 8px" /> -->
-                    <icon-font type="icon-xianshi" style="margin-right: 8px" />
-                    {{ item.blogViews }}
-                  </span>
-                </template>
-              </a-list-item>
+                </a-list-item>
 
-              <!-- footer -->
-              <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
+                <!-- footer -->
+                <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
                 <a-button>加载更多</a-button>
               </div> -->
-            </a-list>
+              </a-list>
+            </a-spin>
           </a-card>
         </a-col>
         <a-col :span="8">
@@ -110,6 +122,7 @@ export default {
   data() {
     return {
       data: [],
+      loading: true,
       listData,
       pagination: {
         onChange: () => {
@@ -154,6 +167,7 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.data = res.data.data;
+          this.loading = false;
         }
       });
     },

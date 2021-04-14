@@ -103,7 +103,7 @@ export default {
             password: values.password,
           };
           user.password = md5(values.password);
-          this.$message.loading("登录中，请稍等...");
+          this.$message.loading("登录中，请稍等...", 0);
           request({
             url: "/user/login",
             method: "post",
@@ -112,9 +112,8 @@ export default {
             let id = res.data.data;
             if (id) {
               this.$store.dispatch("fetchUserInfo", id);
-              setTimeout(() => {
-                this.$router.push("/");
-              }, 2500);
+              this.$router.push("/");
+              this.$message.success("登陆成功", 1);
             } else {
               this.$message.error("用户名或密码错误！");
             }

@@ -8,9 +8,11 @@
         </span>
       </div>
       <div class="side-notice">
-        <div>content...</div>
-        <div>content...</div>
-        <div>content...</div>
+        <a-spin :spinning="noticeLoading">
+          <div>content...</div>
+          <div>content...</div>
+          <div>content...</div>
+        </a-spin>
       </div>
     </div>
     <!-- 热门文章列表 -->
@@ -23,27 +25,29 @@
         </span>
       </div>
       <div class="side-rank">
-        <div
-          class="rank-item"
-          v-for="(item, index) in blogList"
-          :key="item.blogId"
-        >
-          <span
-            class="rank-index"
-            :class="{ 'rank-color-A': index < 3, 'rank-color-B': index >= 3 }"
-            >{{ index + 1 }}</span
+        <a-spin :spinning="listLoading">
+          <div
+            class="rank-item"
+            v-for="(item, index) in blogList"
+            :key="item.blogId"
           >
-          <a-tooltip placement="right">
-            <template slot="title">
-              <span>{{ item.blogTitle }}</span>
-            </template>
-            <a
-              class="rank-title"
-              @click="$router.push({ path: `/blog/${item.blogId}` })"
-              >{{ item.blogTitle | title }}</a
-            >
-          </a-tooltip>
-        </div>
+            <span
+              class="rank-index"
+              :class="{ 'rank-color-A': index < 3, 'rank-color-B': index >= 3 }"
+              >{{ index + 1 }}
+            </span>
+            <a-tooltip placement="right">
+              <template slot="title">
+                <span>{{ item.blogTitle }}</span>
+              </template>
+              <a
+                class="rank-title"
+                @click="$router.push({ path: `/blog/${item.blogId}` })"
+                >{{ item.blogTitle | title }}
+              </a>
+            </a-tooltip>
+          </div>
+        </a-spin>
       </div>
     </div>
     <!-- 友情链接 -->
@@ -55,26 +59,13 @@
         </span>
       </div>
       <div class="side-links">
-        <div>content...</div>
-        <div>content...</div>
-        <div>content...</div>
+        <a-spin :spinning="linkLoading">
+          <div>content...</div>
+          <div>content...</div>
+          <div>content...</div>
+        </a-spin>
       </div>
     </div>
-
-    <!-- <div class="side-title"><a-icon type="sound" /> 网站公告</div>
-    <div>content...</div>
-    <div>content...</div>
-    <div>content...</div>
-    <a-divider></a-divider>
-    <div class="side-title"><a-icon type="fire" /> 热门文章</div>
-    <div>content...</div>
-    <div>content...</div>
-    <div>content...</div>
-    <a-divider></a-divider>
-    <div class="side-title"><a-icon type="link" /> 友情链接</div>
-    <div>content...</div>
-    <div>content...</div>
-    <div>content...</div> -->
   </a-card>
 </template>
 
@@ -85,6 +76,9 @@ export default {
   name: "sideContent",
   data() {
     return {
+      noticeLoading: true,
+      listLoading: true,
+      linkLoading: true,
       blogList: [],
     };
   },
@@ -108,6 +102,7 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.blogList = res.data.data;
+          this.listLoading = false;
         }
       });
     },

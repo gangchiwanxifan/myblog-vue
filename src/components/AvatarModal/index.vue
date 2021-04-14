@@ -91,9 +91,37 @@ export default {
   methods: {
     edit(img) {
       this.visible = true;
+      // 会出现跨域问题
       this.options.img = img;
-      /* 获取原始头像 */
+      // let _this = this;
+      // // 设置头像base64
+      // this.setAvatarBase64(img, (base64) => {
+      //   _this.options.img = base64;
+      // });
     },
+    // // 设置头像base64
+    // setAvatarBase64(src, callback) {
+    //   let _this = this;
+    //   let image = new Image();
+    //   // 处理缓存
+    //   image.src = src + "?v=" + Math.random();
+    //   // 支持跨域图片
+    //   image.crossOrigin = "*";
+    //   image.onload = function () {
+    //     let base64 = _this.transBase64FromImage(image);
+    //     callback && callback(base64);
+    //   };
+    // },
+    // // 将网络图片转换成base64格式
+    // transBase64FromImage(image) {
+    //   let canvas = document.createElement("canvas");
+    //   canvas.width = image.width;
+    //   canvas.height = image.height;
+    //   let ctx = canvas.getContext("2d");
+    //   ctx.drawImage(image, 0, 0, image.width, image.height);
+    //   // 可选其他值 image/jpeg
+    //   return canvas.toDataURL("image/png");
+    // },
     cancelHandel() {
       this.visible = false;
     },

@@ -8,57 +8,61 @@
             <a-icon type="down-circle" />
             <!-- <a-divider></a-divider> -->
           </div>
-          <a-menu
-            mode="inline"
-            :style="{
-              border: '0',
-              width: '100%',
-              minHeight: '70vh',
-              marginBottom: '40px',
-            }"
-            :selectedKeys="selectedKeys"
-          >
-            <a-menu-item
-              v-for="item in data"
-              :key="item.channelId"
-              @click="updateMenu(item.channelId)"
+          <a-spin :spinning="channelLoading">
+            <a-menu
+              mode="inline"
+              :style="{
+                border: '0',
+                width: '100%',
+                minHeight: '70vh',
+                marginBottom: '40px',
+              }"
+              :selectedKeys="selectedKeys"
             >
-              <div class="channel-item">
-                <img :src="item.channelAvatar" height="50px" alt="" />
-                <span class="item-name">{{ item.channelName }}</span>
-              </div>
-            </a-menu-item>
-          </a-menu>
+              <a-menu-item
+                v-for="item in data"
+                :key="item.channelId"
+                @click="updateMenu(item.channelId)"
+              >
+                <div class="channel-item">
+                  <img :src="item.channelAvatar" height="50px" alt="" />
+                  <span class="item-name">{{ item.channelName }}</span>
+                </div>
+              </a-menu-item>
+            </a-menu>
+          </a-spin>
         </div>
         <div class="page-right">
           <div class="channel-info">
-            <div class="channel-info-left">
-              <img
-                :src="currentChannel ? currentChannel.channelAvatar : ''"
-                alt=""
-              />
-            </div>
-            <div class="channel-info-right">
-              <div class="edit-btn-group">
-                <a-button
-                  size="large"
-                  shape="round"
-                  style="color: #42c02e; border-color: #42c02e"
-                  >投稿</a-button
-                >
+            <a-spin :spinning="channelLoading">
+              <div class="channel-info-left">
+                <img
+                  :src="currentChannel ? currentChannel.channelAvatar : ''"
+                  alt=""
+                />
               </div>
-              <div class="title">
-                {{ currentChannel ? currentChannel.channelName : "栏目名称" }}
+              <div class="channel-info-right">
+                <div class="edit-btn-group">
+                  <a-button
+                    size="large"
+                    shape="round"
+                    style="color: #42c02e; border-color: #42c02e"
+                    >投稿</a-button
+                  >
+                </div>
+                <div class="title">
+                  {{ currentChannel ? currentChannel.channelName : "栏目名称" }}
+                </div>
+                <div class="description">
+                  {{
+                    currentChannel
+                      ? currentChannel.channelDescription
+                      : "栏目描述"
+                  }}
+                </div>
               </div>
-              <div class="description">
-                {{
-                  currentChannel
-                    ? currentChannel.channelDescription
-                    : "栏目描述"
-                }}
-              </div>
-            </div>
-            <div class="clear"></div>
+              <div class="clear"></div>
+            </a-spin>
             <a-tabs class="tabs" v-model="activeKey">
               <a-tab-pane key="false">
                 <span class="tabs-item" slot="tab">
@@ -73,75 +77,80 @@
                 </span>
               </a-tab-pane>
             </a-tabs>
-            <a-list
-              item-layout="vertical"
-              size="large"
-              :pagination="pagination"
-              :data-source="blogList"
-            >
-              <a-list-item slot="renderItem" key="item.title" slot-scope="item">
-                <img
-                  slot="extra"
-                  height="125px"
-                  alt="logo"
-                  :src="item.blogAvatar"
-                />
-                <a-list-item-meta>
-                  <a
-                    slot="title"
-                    :href="'#/blog/' + item.blogId"
-                    class="list-title"
-                    >{{ item.blogTitle }}</a
-                  >
-                  <template slot="description">
-                    <span>
-                      <a-tag
-                        v-for="tag in item.blogTags"
-                        :key="tag"
-                        :color="tagColor[Math.floor(Math.random() * 7)]"
-                        >{{ tag }}</a-tag
-                      >
-                      <!-- <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
+            <a-spin :spinning="listLoading" size="large">
+              <a-list
+                item-layout="vertical"
+                size="large"
+                :pagination="pagination"
+                :data-source="blogList"
+              >
+                <a-list-item
+                  slot="renderItem"
+                  key="item.title"
+                  slot-scope="item"
+                >
+                  <img
+                    slot="extra"
+                    height="125px"
+                    alt="logo"
+                    :src="item.blogAvatar"
+                  />
+                  <a-list-item-meta>
+                    <a
+                      slot="title"
+                      :href="'#/blog/' + item.blogId"
+                      class="list-title"
+                      >{{ item.blogTitle }}</a
+                    >
+                    <template slot="description">
+                      <span>
+                        <a-tag
+                          v-for="tag in item.blogTags"
+                          :key="tag"
+                          :color="tagColor[Math.floor(Math.random() * 7)]"
+                          >{{ tag }}</a-tag
+                        >
+                        <!-- <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
                         >设计语言</a-tag
                       >
                       <a-tag :color="tagColor[Math.floor(Math.random() * 7)]"
                         >蚂蚁金服</a-tag
                       > -->
-                    </span>
-                    <!-- <div class="description">
+                      </span>
+                      <!-- <div class="description">
                       {{ item.description }}
                     </div> -->
+                    </template>
+                  </a-list-item-meta>
+                  <div class="description">
+                    {{ item.blogDescription }}
+                  </div>
+                  <!--action-->
+                  <template slot="actions">
+                    <span>
+                      <a-icon type="user" style="margin-right: 8px" />
+                      {{ item.nickname }}
+                    </span>
+                    <span>
+                      <a-icon type="heart" style="margin-right: 8px" />
+                      {{ item.favoriteCount }}
+                    </span>
+                    <span>
+                      <a-icon type="message" style="margin-right: 8px" />
+                      {{ item.commentCount }}
+                    </span>
+                    <span>
+                      <a-icon type="eye" style="margin-right: 8px" />
+                      {{ item.blogViews }}
+                    </span>
                   </template>
-                </a-list-item-meta>
-                <div class="description">
-                  {{ item.blogDescription }}
-                </div>
-                <!--action-->
-                <template slot="actions">
-                  <span>
-                    <a-icon type="user" style="margin-right: 8px" />
-                    {{ item.nickname }}
-                  </span>
-                  <span>
-                    <a-icon type="heart" style="margin-right: 8px" />
-                    {{ item.favoriteCount }}
-                  </span>
-                  <span>
-                    <a-icon type="message" style="margin-right: 8px" />
-                    {{ item.commentCount }}
-                  </span>
-                  <span>
-                    <a-icon type="eye" style="margin-right: 8px" />
-                    {{ item.blogViews }}
-                  </span>
-                </template>
-              </a-list-item>
-
-              <!-- footer -->
-              <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
+                </a-list-item>
+                <!-- footer -->
+                <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
                 <a-button>加载更多</a-button>
               </div> -->
-            </a-list>
+              </a-list>
+            </a-spin>
           </div>
         </div>
       </div>
@@ -155,6 +164,8 @@ import request from "@/utils/request";
 export default {
   data() {
     return {
+      channelLoading: true,
+      listLoading: true,
       data: [],
       activeKey: "false",
       selectedKeys: [],
@@ -210,12 +221,14 @@ export default {
         method: "get",
       }).then((res) => {
         this.data = res.data.data;
+        this.channelLoading = false;
         // console.log(this.data);
         // this.loading = false;
       });
     },
     // 获取文章列表
     getBlogs(id, flag) {
+      this.listLoading = true;
       request({
         url: "/blog/list_channel",
         method: "post",
@@ -223,6 +236,7 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.listData = res.data.data;
+          this.listLoading = false;
           // console.log(this.listData);
         }
       });

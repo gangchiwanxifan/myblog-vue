@@ -1,14 +1,18 @@
 <template>
   <div>
-    <mavon-editor
-      class="blog-editor"
-      toolbarsBackground="#FA541C11"
-      :toolbars="toolbars"
-      v-model="content"
-      @imgAdd="imgAdd"
-      ref="md"
-    />
-    <a-button type="primary" class="submit-btn">提交</a-button>
+    <a-spin :spinning="spinning">
+      <mavon-editor
+        class="blog-editor"
+        toolbarsBackground="#FA541C11"
+        :toolbars="toolbars"
+        v-model="content"
+        @imgAdd="imgAdd"
+        ref="md"
+      />
+      <a-button @click="handlePage" type="primary" class="submit-btn"
+        >提交</a-button
+      >
+    </a-spin>
   </div>
 </template>
 
@@ -19,6 +23,7 @@ export default {
   data() {
     return {
       content: "",
+      spinning: true,
       toolbars: {
         bold: true, // 粗体
         italic: true, // 斜体
@@ -56,6 +61,14 @@ export default {
       },
     };
   },
+  computed: {
+    userId() {
+      return this.$store.state.user.userInfo.userId;
+    },
+  },
+  mounted() {
+    this.getHomePage();
+  },
   methods: {
     // 将图片上传，返回地址替换到md中
     imgAdd(pos, $file) {
@@ -72,6 +85,43 @@ export default {
         } else {
           this.$message.error("图片上传出错");
           // console.log(res);
+        }
+      });
+    },
+    // 获取用户主页
+    getHomePage() {
+      request({
+        url: "/homepage/get",
+        method: "post",
+        data: { userId: this.userId },
+      }).then((res) => {
+        if (res.data.data) {
+          this.content = res.data.data.pageContent;
+          this.spinning = false;
+        } else {
+          this.$message.error("获取主页信息失败", 1);
+          this.spinning = false;
+        }
+      });
+    },
+    // 提交主页
+    handlePage() {
+      this.spinning = true;
+      const homePage = {
+        userId: this.userId,
+        pageContent: this.content,
+      };
+      request({
+        url: "/homepage/update",
+        method: "post",
+        data: homePage,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("修改成功", 1);
+          this.spinning = false;
+        } else {
+          this.$message.success("修改失败", 1);
+          this.spinning = false;
         }
       });
     },
