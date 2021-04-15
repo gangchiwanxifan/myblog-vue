@@ -171,9 +171,9 @@ export default {
       selectedKeys: [],
       listData: [],
       pagination: {
-        onChange: () => {
-          document.documentElement.scrollTop = 200;
-        },
+        // onChange: () => {
+        //   document.documentElement.scrollTop = 200;
+        // },
         pageSize: 5,
       },
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],

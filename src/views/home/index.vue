@@ -163,7 +163,7 @@ export default {
     getList() {
       request({
         url: "/blog/list",
-        method: "post",
+        method: "get",
       }).then((res) => {
         if (res.data.data) {
           this.data = res.data.data;

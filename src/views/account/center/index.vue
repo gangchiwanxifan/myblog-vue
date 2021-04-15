@@ -5,17 +5,21 @@
       <div class="h-user">
         <div class="h-info">
           <div class="h-avatar">
-            <img :src="img" id="h-avatar" alt="" />
+            <img :src="userInfo.avatar" id="h-avatar" alt="" />
           </div>
           <div class="h-basic">
             <div>
               <span id="h-name"
-                >71369754782_bili <a-icon type="man" style="color: blue" />
+                >{{ userInfo.nickname }}
+                <a-icon type="man" style="color: blue" />
               </span>
             </div>
             <div class="h-basic-spacing">
-              <span class="h-sign"> asdsafgsdgasdg </span>
+              <span class="h-sign"> {{ userInfo.introduction }} </span>
             </div>
+          </div>
+          <div class="h-side">
+            <div class="h-side2"><a-button>关注</a-button></div>
           </div>
         </div>
       </div>
@@ -45,6 +49,7 @@
 </template>
 
 <script>
+import request from "@/utils/request";
 import {
   HomePage,
   ArticlePage,
@@ -53,6 +58,17 @@ import {
   FollowPage,
   FansPage,
 } from "./page";
+
+const list2 = [
+  {
+    key: "home",
+    tab: "主页",
+  },
+  {
+    key: "blog",
+    tab: "文章",
+  },
+];
 
 export default {
   components: {
@@ -67,6 +83,7 @@ export default {
     return {
       bgImg: "/center.png",
       img: "/avatar.png",
+      userInfo: {},
       tabListNoTitle: [
         {
           key: "home",
@@ -88,12 +105,40 @@ export default {
       noTitleKey: "home",
     };
   },
+  mounted() {
+    if (this.homeId == this.userId) {
+      this.userInfo = this.$store.state.user.userInfo;
+    } else {
+      this.tabListNoTitle = list2;
+      this.getUser();
+    }
+  },
+  computed: {
+    homeId() {
+      return this.$route.params.userId;
+    },
+    userId() {
+      return this.$store.state.user.userInfo.userId;
+    },
+  },
   methods: {
     onTabChange(key, type) {
       this[type] = key;
     },
     onSideChange(key) {
       this.noTitleKey = key;
+    },
+    getUser() {
+      request({
+        url: "/user/get_user",
+        method: "post",
+        data: { id: this.homeId },
+      }).then((res) => {
+        if (res.data.data) {
+          this.userInfo = res.data.data;
+          // console.log(this.userInfo);
+        }
+      });
     },
   },
 };
@@ -171,6 +216,14 @@ export default {
         top: -1px;
         width: 730px;
         font-weight: 400;
+      }
+    }
+    .h-side {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      .h-side2 {
+        margin: 0 20px 17px 0;
       }
     }
   }

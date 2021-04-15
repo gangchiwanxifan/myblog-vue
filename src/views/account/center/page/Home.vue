@@ -126,6 +126,12 @@ export default {
       return this.$route.params.userId;
     },
   },
+  watch: {
+    homeId: function (val) {
+      console.log(val);
+      this.$router.go(0);
+    },
+  },
   methods: {
     getHomePage() {
       const user = {
@@ -153,7 +159,7 @@ export default {
         if (res.data.data) {
           this.userInfo = res.data.data;
           this.userLoading = false;
-          console.log(this.userInfo);
+          // console.log(this.userInfo);
         }
       });
     },
@@ -210,7 +216,7 @@ export default {
 }
 .markdown-body {
   border: none;
-  // z-index: 1000 !important;
+  z-index: 1000 !important;
 }
 .tags {
   margin-bottom: 8px;
