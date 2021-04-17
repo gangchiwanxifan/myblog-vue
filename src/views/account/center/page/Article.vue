@@ -49,7 +49,10 @@
                   >
                 </a-list-item-meta>
                 <div v-if="userId == homeId">
-                  <a-button>编辑</a-button>
+                  <a-button
+                    @click="$router.push({ path: `/blog/edit/${item.blogId}` })"
+                    >编辑
+                  </a-button>
                   <a-divider type="vertical"></a-divider>
                   <a-button
                     type="danger"
@@ -153,7 +156,7 @@ export default {
       request({
         url: "blog/list/user",
         method: "post",
-        data: { userId: this.homeId },
+        data: { blogAuthorId: this.homeId },
       }).then((res) => {
         if (res.data.data) {
           this.data1 = res.data.data;
@@ -172,6 +175,31 @@ export default {
           this.data2 = res.data.data;
           this.loading = false;
         }
+      });
+    },
+    showDeleteConfirm(blogId) {
+      const _this = this;
+      this.$confirm({
+        title: "确定删除该文章?",
+        okText: "Yes",
+        okType: "danger",
+        cancelText: "No",
+        onOk() {
+          _this.$message.loading("删除中，请稍等...", 0);
+          request({
+            url: "/blog/delete",
+            method: "post",
+            data: { blogId: blogId },
+          }).then((res) => {
+            if (res.data.data) {
+              _this.$message.success("删除成功");
+              _this.loading = true;
+              _this.getList();
+            } else {
+              _this.$message.error("删除失败");
+            }
+          });
+        },
       });
     },
   },

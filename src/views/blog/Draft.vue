@@ -24,7 +24,9 @@
               item.blogTitle
             }}</a>
           </a-list-item-meta>
-          <a-button>编辑</a-button>
+          <a-button @click="$router.push({ path: `/blog/edit/${item.blogId}` })"
+            >编辑</a-button
+          >
           <a-divider type="vertical"></a-divider>
           <a-button type="danger" @click="showDeleteConfirm(item.blogId)"
             >删除</a-button
@@ -71,6 +73,7 @@ export default {
         okType: "danger",
         cancelText: "No",
         onOk() {
+          _this.$message.loading("删除中，请稍等...", 0);
           request({
             url: "/blog/delete",
             method: "post",
@@ -84,9 +87,6 @@ export default {
               _this.$message.error("删除失败");
             }
           });
-        },
-        onCancel() {
-          console.log("Cancel");
         },
       });
     },

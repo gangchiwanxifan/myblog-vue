@@ -1,141 +1,165 @@
 <template>
   <div id="main">
-    <a-card style="margin: 20px 20px">
-      <a-button
-        class="draft-btn"
-        type="dashed"
-        size="large"
-        @click="handleToDraft"
-      >
-        <a-icon type="delete" />草稿箱
-      </a-button>
-      <a-form v-bind="formItemLayout">
-        <a-form-item :wrapperCol="{ span: 20 }" style="width: 80%">
-          <a-input
-            v-model="blog.title"
-            class="blog-title"
-            placeholder="请输入标题"
-          ></a-input>
-        </a-form-item>
-        <mavon-editor
-          class="blog-editor"
-          toolbarsBackground="#FA541C11"
-          v-model="blog.content"
-          @imgAdd="imgAdd"
-          ref="md"
-        />
-        <a-divider />
-        <a-form-item label="请选择栏目分类">
-          <a-radio-group
-            button-style="solid"
-            size="large"
-            v-model="blog.selectedChannel"
-          >
-            <a-radio-button
-              v-for="item in channels"
-              :value="item.channelId"
-              :key="item.channelId"
-            >
-              {{ item.channelName }}
-            </a-radio-button>
-          </a-radio-group>
-        </a-form-item>
-        <div class="copyright-hint">
-          <a-icon type="info-circle" />
-          <span>非必选，若不选择分类，则默认进入生活分区</span>
-        </div>
-        <a-form-item label="请设置文章封面">
-          <!--  -->
-          <div class="ant-upload-preview" @click="$refs.modal.edit(blog.img)">
-            <a-icon type="cloud-upload-o" class="upload-icon" />
-            <div class="mask">
-              <a-icon type="plus" />
-            </div>
-            <img :src="blog.img" onerror="this.src='/article.png'" />
-          </div>
-          <!--  -->
-        </a-form-item>
-        <a-form-item label="请添加标签">
-          <blog-tags :tags="blog.tags" @updateTags="updateTags" />
-        </a-form-item>
-        <a-form-item label="请选择文集">
-          <a-button @click="showCataModal">选择文集</a-button>
-        </a-form-item>
-        <div class="copyright-hint">
-          <a-icon type="info-circle" />
-          <span>可在个人中心创建或管理文集哦~</span>
-        </div>
-        <a-form-item class="submit-btns">
-          <a-button
-            type="primary"
-            size="large"
-            shape="round"
-            @click="saveBlog(0)"
-          >
-            提交文章
-          </a-button>
-          <a-button
-            size="large"
-            shape="round"
-            style="margin-left: 20px"
-            @click="saveBlog(1)"
-          >
-            存为草稿
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </a-card>
-    <!-- 选择文集对话框 -->
-    <a-modal
-      v-model="cata_visible"
-      title="选择文集"
-      width="400px"
-      @ok="handleCataOk"
-    >
-      <div class="add_modal">
-        <a-radio-group v-model="blog.selectedCatagory">
-          <a-radio
-            v-for="item in catagory"
-            :style="radioStyle"
-            :value="item.catagoryId"
-            :key="item.catagoryId"
-          >
-            {{ item.catagoryName }}
-          </a-radio>
-        </a-radio-group>
-      </div>
-
-      <div>
+    <a-spin :spinning="loading" size="large">
+      <a-card style="margin: 20px 20px">
         <a-button
-          class="add_catagory_btn"
-          v-show="!is_add"
-          @click="showAdd"
-          :disabled="catagory.length >= 10"
-          ><a-icon type="plus"></a-icon>新建文集({{
-            this.catagory.length
-          }}/10)</a-button
+          class="draft-btn"
+          type="dashed"
+          size="large"
+          @click="handleToDraft"
         >
-        <div>
-          <a-input-search
-            v-model="add_cata"
-            v-show="is_add"
-            placeholder="请输入文集名称"
-            @search="onSearch"
-          >
-            <a-button slot="enterButton"> 新建 </a-button>
-          </a-input-search>
+          <a-icon type="delete" />草稿箱
+        </a-button>
+        <a-form v-bind="formItemLayout">
+          <a-form-item :wrapperCol="{ span: 20 }" style="width: 80%">
+            <a-input
+              v-model="blog.title"
+              class="blog-title"
+              placeholder="请输入标题"
+            ></a-input>
+          </a-form-item>
+          <mavon-editor
+            class="blog-editor"
+            toolbarsBackground="#FA541C11"
+            v-model="blog.content"
+            @imgAdd="imgAdd"
+            ref="md"
+          />
+          <a-divider />
+          <a-form-item label="请选择栏目分类">
+            <!-- <a-button @click="blog.selectedChannel = 1"></a-button> -->
+            <a-radio-group
+              button-style="solid"
+              size="large"
+              v-model="blog.selectedChannel"
+            >
+              <a-radio-button
+                v-for="item in channels"
+                :value="item.channelId"
+                :key="item.channelId"
+              >
+                <!-- {{ item.channelId }} -->
+                {{ item.channelName }}
+              </a-radio-button>
+            </a-radio-group>
+          </a-form-item>
+          <div class="copyright-hint">
+            <a-icon type="info-circle" />
+            <span>非必选，若不选择分类，则默认进入生活分区</span>
+          </div>
+          <a-form-item label="请设置文章封面">
+            <!--  -->
+            <div class="ant-upload-preview" @click="$refs.modal.edit(blog.img)">
+              <a-icon type="cloud-upload-o" class="upload-icon" />
+              <div class="mask">
+                <a-icon type="plus" />
+              </div>
+              <img :src="blog.img" onerror="this.src='/article.png'" />
+            </div>
+            <!--  -->
+          </a-form-item>
+          <a-form-item label="请添加标签">
+            <blog-tags :tags="blogTags" @updateTags="updateTags" />
+          </a-form-item>
+          <a-form-item label="请选择文集">
+            <a-button @click="showCataModal">选择文集</a-button>
+          </a-form-item>
+          <div class="copyright-hint">
+            <a-icon type="info-circle" />
+            <span>可在个人中心创建或管理文集哦~</span>
+          </div>
+          <a-form-item class="submit-btns">
+            <div v-if="isEdit == 0">
+              <a-button
+                type="primary"
+                size="large"
+                shape="round"
+                @click="saveBlog(0)"
+              >
+                提交文章
+              </a-button>
+              <a-button
+                size="large"
+                shape="round"
+                style="margin-left: 20px"
+                @click="saveBlog(1)"
+              >
+                存为草稿
+              </a-button>
+            </div>
+            <div v-else>
+              <a-button
+                type="primary"
+                size="large"
+                shape="round"
+                @click="editBlog(0)"
+              >
+                保存发布
+              </a-button>
+              <a-button
+                size="large"
+                shape="round"
+                style="margin-left: 20px"
+                @click="editBlog(1)"
+              >
+                存为草稿
+              </a-button>
+            </div>
+          </a-form-item>
+        </a-form>
+      </a-card>
+      <!-- 选择文集对话框 -->
+      <a-modal
+        v-model="cata_visible"
+        title="选择文集"
+        width="400px"
+        @ok="handleCataOk"
+      >
+        <div class="add_modal">
+          <a-radio-group v-model="blog.selectedCatagory">
+            <a-radio
+              v-for="item in catagory"
+              :style="radioStyle"
+              :value="item.catagoryId"
+              :key="item.catagoryId"
+            >
+              {{ item.catagoryName }}
+            </a-radio>
+          </a-radio-group>
         </div>
-      </div>
-    </a-modal>
 
-    <!-- 封面图片 -->
-    <avatar-modal
-      :CropWidth="300"
-      :modalWidth="900"
-      :preStyle="{ width: '300px' }"
-      ref="modal"
-      @ok="setavatar"
-    />
+        <div>
+          <a-button
+            class="add_catagory_btn"
+            v-show="!is_add"
+            @click="showAdd"
+            :disabled="catagory.length >= 10"
+            ><a-icon type="plus"></a-icon>新建文集({{
+              this.catagory.length
+            }}/10)</a-button
+          >
+          <div>
+            <a-input-search
+              v-model="add_cata"
+              v-show="is_add"
+              placeholder="请输入文集名称"
+              @search="onSearch"
+            >
+              <a-button slot="enterButton"> 新建 </a-button>
+            </a-input-search>
+          </div>
+        </div>
+      </a-modal>
+
+      <!-- 封面图片 -->
+      <avatar-modal
+        :CropWidth="300"
+        :modalWidth="900"
+        :preStyle="{ width: '300px' }"
+        ref="modal"
+        @ok="setavatar"
+      />
+    </a-spin>
   </div>
 </template>
 
@@ -152,12 +176,26 @@ export default {
   data() {
     return {
       blog: {
+        // id: "",
         title: "",
         content: "",
         selectedChannel: 6,
         selectedCatagory: "",
         img: "/article.png",
-        tags: ["default"],
+        tags: "default",
+        // description: "",
+      },
+      editId: "",
+      loading: false,
+      channels: [],
+      catagory: [],
+      is_add: false,
+      cata_visible: false,
+      add_cata: "",
+      radioStyle: {
+        display: "block",
+        height: "40px",
+        lineHeight: "40px",
       },
       formItemLayout: {
         labelCol: {
@@ -167,29 +205,36 @@ export default {
           span: 16,
         },
       },
-      userInfo: {},
-      channels: [],
-      catagory: [],
-      is_add: false,
-      add_cata: "",
-      radioStyle: {
-        display: "block",
-        height: "40px",
-        lineHeight: "40px",
-      },
-      cata_visible: false,
     };
-  },
-  beforeMount() {
-    this.userInfo = this.$store.state.user.userInfo;
   },
   mounted() {
     this.getChannels();
     this.getCatagory(this.userInfo.userId);
+    // console.log(this.blog.selectedChannel);
+    if (this.$route.query.channelId) {
+      this.blog.selectedChannel = parseInt(this.$route.query.channelId);
+    }
+    if (this.$route.params.blogId) {
+      this.getBlog();
+    }
   },
   computed: {
+    isEdit() {
+      if (this.$route.params.blogId) {
+        return 1;
+      } else {
+        return 0;
+      }
+    },
+    userInfo() {
+      return this.$store.state.user.userInfo;
+    },
     blogTags: function () {
-      return this.blog.tags.join();
+      if (this.blog.tags) {
+        return this.blog.tags.split(",");
+      } else {
+        return [];
+      }
     },
     checkContent: function () {
       if (!this.blog.title) {
@@ -286,19 +331,7 @@ export default {
       });
     },
     updateTags(tags) {
-      this.blog.tags = tags;
-    },
-    // test
-    show() {
-      console.log(this.blog.title);
-      console.log(this.blog.content);
-      console.log(this.blog.selectedChannel);
-      console.log(this.blog.selectedCatagory);
-      // console.log(this.tags);
-      console.log(this.blogTags);
-      console.log(
-        this.blog.content.substring(0, 60).replaceAll("\n", "") + "..."
-      );
+      this.blog.tags = tags.join();
     },
     saveBlog(isDraft) {
       if (this.checkContent !== 0) {
@@ -310,7 +343,7 @@ export default {
           blogChannelId: this.blog.selectedChannel,
           blogCatagoryId: this.blog.selectedCatagory,
           blogContent: this.blog.content,
-          blogTags: this.blogTags,
+          blogTags: this.blog.tags,
           blogAvatar: this.blog.img,
           blogStatus: isDraft,
           blogDescription:
@@ -333,10 +366,71 @@ export default {
               selectedChannel: 6,
               selectedCatagory: "",
               img: "/article.png",
-              tags: ["default"],
+              tags: "default",
             };
           } else {
             this.$message.error("请求错误");
+          }
+        });
+      }
+    },
+    // 编辑文章
+    getBlog() {
+      this.loading = true;
+      request({
+        url: "/blog/get",
+        method: "post",
+        data: { blogId: this.$route.params.blogId },
+      }).then((res) => {
+        if (res.data.data) {
+          if (res.data.data.blogAuthorId == this.userInfo.userId) {
+            const data = res.data.data;
+            this.editId = data.blogId;
+            this.blog.title = data.blogTitle;
+            this.blog.content = data.blogContent;
+            this.blog.selectedChannel = parseInt(data.blogChannelId);
+            this.blog.selectedCatagory = parseInt(data.blogCatagoryId);
+            this.blog.img = data.blogAvatar;
+            this.blog.tags = data.blogTags;
+            this.loading = false;
+          } else {
+            this.$router.push({ path: "/blog/edit" });
+            this.loading = false;
+          }
+        } else {
+          this.$router.push({ path: "/blog/edit" });
+          this.loading = false;
+        }
+      });
+    },
+    editBlog(status) {
+      if (this.checkContent !== 0) {
+        this.$message.warning(this.checkContent);
+      } else {
+        this.$message.loading("保存中，请稍等...", 0);
+        const blog = {
+          blogId: this.editId,
+          blogTitle: this.blog.title,
+          blogAuthorId: this.userInfo.userId,
+          blogChannelId: this.blog.selectedChannel,
+          blogCatagoryId: this.blog.selectedCatagory,
+          blogContent: this.blog.content,
+          blogTags: this.blog.tags,
+          blogAvatar: this.blog.img,
+          blogStatus: status,
+          blogDescription:
+            this.blog.content.substring(0, 60).replaceAll("\n", "") + "...",
+        };
+        request({
+          url: "/blog/update",
+          method: "post",
+          data: blog,
+        }).then((res) => {
+          if (res.data.data) {
+            this.$message.success("保存成功");
+            this.$router.push({ path: "/" });
+          } else {
+            this.$message.error("发生未知错误");
           }
         });
       }

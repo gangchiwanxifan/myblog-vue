@@ -47,6 +47,12 @@
                     size="large"
                     shape="round"
                     style="color: #42c02e; border-color: #42c02e"
+                    @click="
+                      $router.push({
+                        path: '/blog/edit',
+                        query: { channelId: currentChannel.channelId },
+                      })
+                    "
                     >投稿</a-button
                   >
                 </div>

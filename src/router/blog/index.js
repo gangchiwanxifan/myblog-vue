@@ -4,7 +4,11 @@ export default [
     name: "addBlog",
     component: () => import("@/views/blog/Edit"),
   },
-
+  {
+    path: "/blog/edit/:blogId",
+    name: "editBlog",
+    component: () => import("@/views/blog/Edit"),
+  },
   {
     path: "/blog/draft",
     name: "draft",

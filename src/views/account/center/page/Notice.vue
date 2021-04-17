@@ -143,16 +143,7 @@ export default {
     },
     getDrafts() {
       // const userId = this.$store.state.user.userInfo.userId;
-      request({
-        url: "blog/draft",
-        method: "post",
-        data: { userId: this.$store.state.user.userInfo.userId },
-      }).then((res) => {
-        if (res.data.data) {
-          this.data = res.data.data;
-          this.loading = false;
-        }
-      });
+      request({});
     },
   },
 };

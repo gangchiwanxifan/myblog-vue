@@ -11,7 +11,7 @@
             <div>
               <span id="h-name"
                 >{{ userInfo.nickname }}
-                <a-icon type="man" style="color: blue" />
+                <icon-font :type="icon[userInfo.sex]" />
               </span>
             </div>
             <div class="h-basic-spacing">
@@ -102,6 +102,7 @@ export default {
           tab: "通知",
         },
       ],
+      icon: ["icon-gougouchushou", "icon-nan", "icon-nv1"],
       noTitleKey: "home",
     };
   },
@@ -193,8 +194,8 @@ export default {
         display: inline-block;
         margin-right: 5px;
         font-weight: 700;
-        line-height: 18px;
-        font-size: 18px;
+        line-height: 20px;
+        font-size: 20px;
         vertical-align: middle;
       }
 

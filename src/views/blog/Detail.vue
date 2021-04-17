@@ -10,69 +10,83 @@
         <div class="P63n6G">赞赏</div>
       </div>
     </div>
-    <a-card class="page-container-card" :bordered="false">
-      <div class="page-title">
-        <a class="favorite"><a-icon type="plus" /> 收藏</a>
-        <h1 class="page-title-blog">
-          <span>{{ blogDetail.blogTitle }}</span>
-        </h1>
-        <div class="page-title-author">
-          <span>
-            <a>
-              <img class="title-avatar" :src="blogDetail.avatar" />
-              <span class="item" style="padding: 0 7px">{{
-                blogDetail.nickname
-              }}</span>
-            </a>
-          </span>
-          <span class="item">
-            <span
-              >分类：<a>{{ blogDetail.channelName }}</a></span
+    <a-spin :spinning="blogLoading" size="large">
+      <a-card class="page-container-card" :bordered="false">
+        <div class="page-title">
+          <a class="favorite"><a-icon type="plus" /> 收藏</a>
+          <h1 class="page-title-blog">
+            <span>{{ blogDetail.blogTitle }}</span>
+          </h1>
+          <div class="page-title-author">
+            <span>
+              <a>
+                <img class="title-avatar" :src="blogDetail.avatar" />
+                <span class="item" style="padding: 0 7px">{{
+                  blogDetail.nickname
+                }}</span>
+              </a>
+            </span>
+            <span class="item">
+              <span
+                >分类：<a>{{ blogDetail.channelName }}</a></span
+              >
+            </span>
+            <span class="item">浏览：{{ blogDetail.blogViews }}</span>
+            <span class="update-time"
+              >最后修改于：{{ blogDetail.updateTime }}</span
             >
-          </span>
-          <span class="item">浏览：{{ blogDetail.blogViews }}</span>
-          <span class="update-time"
-            >最后修改于：{{ blogDetail.updateTime }}</span
-          >
-        </div>
-      </div>
-      <mavon-editor
-        :value="blogDetail.blogContent"
-        :subfield="false"
-        :defaultOpen="'preview'"
-        :toolbarsFlag="false"
-        :editable="false"
-        :scrollStyle="true"
-        :boxShadow="false"
-        :previewBackground="'#fff'"
-        :ishljs="true"
-      />
-      <a-tag
-        class="tags"
-        v-for="tag in tags"
-        :key="tag"
-        :color="tagColor[Math.floor(Math.random() * 7)]"
-      >
-        {{ tag }}
-      </a-tag>
-      <a-divider />
-      <div>
-        <div class="follow-box">
-          <img src="/avatar.png" alt="" />
-          <div class="follow-content">
-            <div class="follow-user">yonghuming</div>
-            <div class="follow-info">ta很懒....</div>
-          </div>
-          <div class="follow-btn">
-            <a-button @click="show">关注</a-button>
           </div>
         </div>
-        <span class="pay-info">"小礼物走一走，来Simple Blog关注我"</span>
-        <a-button id="pay-btn" class="pay-btn" shape="round" type="primary">
-          ￥赞赏支持
-        </a-button>
-      </div>
-    </a-card>
+        <mavon-editor
+          :value="blogDetail.blogContent"
+          :subfield="false"
+          :defaultOpen="'preview'"
+          :toolbarsFlag="false"
+          :editable="false"
+          :scrollStyle="true"
+          :boxShadow="false"
+          :previewBackground="'#fff'"
+          :ishljs="true"
+        />
+        <a-tag
+          class="tags"
+          v-for="tag in tags"
+          :key="tag"
+          :color="tagColor[Math.floor(Math.random() * 7)]"
+        >
+          {{ tag }}
+        </a-tag>
+        <a-divider />
+        <div>
+          <div class="follow-box">
+            <img
+              :src="blogDetail.avatar"
+              style="border-radius: 50%; cursor: pointer"
+              @click="
+                $router.push({ path: `/center/${blogDetail.blogAuthorId}` })
+              "
+            />
+            <div
+              class="follow-content"
+              @click="
+                $router.push({ path: `/center/${blogDetail.blogAuthorId}` })
+              "
+              style="cursor: pointer"
+            >
+              <div class="follow-user">{{ blogDetail.nickname }}</div>
+              <div class="follow-info">{{ blogDetail.introduction }}</div>
+            </div>
+            <div class="follow-btn">
+              <a-button @click="show">关注</a-button>
+            </div>
+          </div>
+          <span class="pay-info">"小礼物走一走，来Simple Blog关注我"</span>
+          <a-button id="pay-btn" class="pay-btn" shape="round" type="primary">
+            ￥赞赏支持
+          </a-button>
+        </div>
+      </a-card>
+    </a-spin>
     <!-- 评论部分 -->
     <a-card class="comment-card" :bordered="false">
       <h2>评论</h2>
@@ -122,13 +136,15 @@
           </div>
         </div>
       </a-comment>
-      <div>
-        <div v-if="!hasComment" class="no-reply">看看下面~来抢沙发吧</div>
-        <div v-else>
-          <blog-comments @reply="reply" :comments="comments" />
-          <div class="no-reply">没有更多评论</div>
+      <a-spin :spinning="commentLoading">
+        <div>
+          <div v-if="!hasComment" class="no-reply">看看下面~来抢沙发吧</div>
+          <div v-else>
+            <blog-comments @reply="reply" :comments="comments" />
+            <div class="no-reply">没有更多评论</div>
+          </div>
         </div>
-      </div>
+      </a-spin>
     </a-card>
   </div>
 </template>
@@ -152,6 +168,8 @@ export default {
       comments: [],
       replyCommentId: "",
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
+      blogLoading: true,
+      commentLoading: true,
     };
   },
   mounted() {
@@ -187,6 +205,7 @@ export default {
       console.log(this.hasComment);
     },
     getBlog(blogId) {
+      // this.blogLoading = true;
       request({
         url: "/blog/detail",
         method: "post",
@@ -194,10 +213,13 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.blogDetail = res.data.data;
+          this.blogLoading = false;
+          console.log(this.blogLoading);
         }
       });
     },
     getComments(blogId) {
+      this.commentLoading = true;
       request({
         url: `/comment/${blogId}`,
         methods: "post",
@@ -205,6 +227,7 @@ export default {
         if (res.data.data) {
           this.comments = res.data.data;
           // console.log(res.data.data);
+          this.commentLoading = false;
         }
       });
     },
