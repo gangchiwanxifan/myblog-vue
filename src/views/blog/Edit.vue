@@ -436,6 +436,26 @@ export default {
       }
     },
   },
+  watch: {
+    $route(to, from) {
+      //监听路由是否变化
+      if (to.params != from.params) {
+        this.blog = {
+          // id: "",
+          title: "",
+          content: "",
+          selectedChannel: 6,
+          selectedCatagory: "",
+          img: "/article.png",
+          tags: "default",
+          // description: "",
+        };
+        this.editId = "";
+        this.channels = [];
+        this.catagory = [];
+      }
+    },
+  },
 };
 </script>
 

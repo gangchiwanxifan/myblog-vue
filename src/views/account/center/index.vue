@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wide">
+  <div class="page-wide" :key="homeId">
     <div class="h-inner" :style="{ backgroundImage: `url(${bgImg})` }">
       <div class="h-gradient"></div>
       <div class="h-user">
@@ -140,6 +140,19 @@ export default {
           // console.log(this.userInfo);
         }
       });
+    },
+  },
+  watch: {
+    $route(to, from) {
+      //监听路由是否变化
+      if (to.params != from.params) {
+        if (this.homeId == this.userId) {
+          this.userInfo = this.$store.state.user.userInfo;
+        } else {
+          this.tabListNoTitle = list2;
+          this.getUser();
+        }
+      }
     },
   },
 };

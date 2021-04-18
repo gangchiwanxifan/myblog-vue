@@ -28,7 +28,7 @@
       <div class="charge-modal-container">
         <div class="title">
           <img :src="userInfo.avatar" />
-          <dic class="content">余额充值</dic>
+          <div class="content">余额充值</div>
         </div>
         <div class="money-btn-group">
           <div

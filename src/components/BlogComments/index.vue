@@ -25,8 +25,12 @@
                   commentId: comment.commentId,
                 })
               "
-              ><a-icon type="edit" theme="filled" /> 回复</a
             >
+              <a-icon type="edit" theme="filled" /> 回复
+            </a>
+            <a v-if="comment.commentUserId == userId">
+              <a-icon type="delete" theme="filled" /> 删除
+            </a>
           </span>
         </div>
       </div>
@@ -54,7 +58,11 @@ export default {
       default: () => [],
     },
   },
-  computed: {},
+  computed: {
+    userId() {
+      return this.$store.state.user.userInfo.userId;
+    },
+  },
   filters: {
     timefix: function (value) {
       const time = timeTransform(value);
@@ -65,6 +73,9 @@ export default {
     reply(comment) {
       // console.log(comment);
       this.$emit("reply", comment);
+    },
+    test() {
+      console.log();
     },
   },
 };
@@ -106,9 +117,10 @@ export default {
         color: #99a2aa;
         font-size: 12px;
         .time {
-          margin: 0 20px 0 0;
+          // margin: 0 20px 0 0;
         }
         a {
+          margin-left: 20px;
           color: #99a2aa;
         }
       }

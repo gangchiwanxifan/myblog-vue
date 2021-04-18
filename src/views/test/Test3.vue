@@ -12,7 +12,7 @@
 
 <script>
 import request from "@/utils/request";
-import BlogComments from "@/components/BlogComments/index2.vue";
+import BlogComments from "@/components/BlogComments/index.vue";
 
 export default {
   components: {

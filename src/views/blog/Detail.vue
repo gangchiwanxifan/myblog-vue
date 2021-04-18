@@ -1,11 +1,17 @@
 <template>
   <div class="page-container" @click="closeSel">
     <div class="_3Pnjry">
-      <div class="_1pUUKr">
+      <div v-if="isFavorite" @click="cancelFavorite" class="_1pUUKr">
+        <div class="_2VdqdF" style="background-color: #00a1d6; color: #fff">
+          <a-icon type="like" theme="filled" />
+        </div>
+        <div class="P63n6G" style="color: #00a1d6">已赞</div>
+      </div>
+      <div v-else class="_1pUUKr" @click="addFavorite">
         <div class="_2VdqdF"><a-icon type="like" theme="filled" /></div>
         <div class="P63n6G">点赞</div>
       </div>
-      <div class="_1pUUKr">
+      <div class="_1pUUKr" @click="showModal">
         <div class="_2VdqdF">￥</div>
         <div class="P63n6G">赞赏</div>
       </div>
@@ -13,7 +19,8 @@
     <a-spin :spinning="blogLoading" size="large">
       <a-card class="page-container-card" :bordered="false">
         <div class="page-title">
-          <a class="favorite"><a-icon type="plus" /> 收藏</a>
+          <a class="favorite" v-if="!isFavorite"><a-icon type="plus" /> 收藏</a>
+          <a class="favorite" v-else><a-icon type="check" /> 已收藏</a>
           <h1 class="page-title-blog">
             <span>{{ blogDetail.blogTitle }}</span>
           </h1>
@@ -77,11 +84,30 @@
               <div class="follow-info">{{ blogDetail.introduction }}</div>
             </div>
             <div class="follow-btn">
-              <a-button @click="show">关注</a-button>
+              <a-button
+                class="follow"
+                type="primary"
+                @click="addFollow"
+                v-if="!isFollow"
+                ><a-icon type="plus" />关注</a-button
+              >
+              <a-button
+                class="followed"
+                type="primary"
+                @click="cancelFollow"
+                v-else
+                ><a-icon type="check" />已关注</a-button
+              >
             </div>
           </div>
           <span class="pay-info">"小礼物走一走，来Simple Blog关注我"</span>
-          <a-button id="pay-btn" class="pay-btn" shape="round" type="primary">
+          <a-button
+            id="pay-btn"
+            @click="showModal"
+            class="pay-btn"
+            shape="round"
+            type="primary"
+          >
             ￥赞赏支持
           </a-button>
         </div>
@@ -146,6 +172,53 @@
         </div>
       </a-spin>
     </a-card>
+    <!-- 打赏弹窗 -->
+    <a-modal v-model="visible" :width="640" :footer="null">
+      <div class="charge-modal-container">
+        <div class="title">
+          <img :src="blogDetail.avatar" />
+          <div class="content">赞赏支持</div>
+        </div>
+        <div class="money-btn-group">
+          <div
+            v-for="(item, index) in money"
+            :key="item"
+            class="btn"
+            :class="{ selected: index == choice }"
+            @click="select(index)"
+          >
+            <span><icon-font type="icon-lingshi" /> {{ item }}</span>
+          </div>
+        </div>
+        <div class="choose-method">选择支付方式</div>
+        <div class="method-btn-group">
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>网站暂时不支持微信支付</span>
+            </template>
+            <div class="pay-btn">
+              <icon-font type="icon-zhifu" /> <span>微信支付</span>
+            </div>
+          </a-tooltip>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>网站暂时不支持支付宝</span>
+            </template>
+            <div class="pay-btn">
+              <icon-font type="icon-umidd17" /><span>支付宝</span>
+            </div>
+          </a-tooltip>
+          <div class="pay-btn">
+            <icon-font type="icon-jinbi" /><span>余额支付</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center">
+        <a-button class="handle-btn" type="primary" @click="handlePay"
+          ><span>确认支付 ￥{{ money[choice] }}</span></a-button
+        >
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -170,12 +243,16 @@ export default {
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
       blogLoading: true,
       commentLoading: true,
+      visible: false,
+      money: [2, 5, 10, 20, 50, 100],
+      choice: 0,
+      isFavorite: false,
+      isFollow: false,
     };
   },
   mounted() {
     this.getBlog(this.blogId);
     this.getComments(this.blogId);
-    // console.log(this.$route.params.id);
   },
   computed: {
     tags: function () {
@@ -198,12 +275,22 @@ export default {
         return false;
       }
     },
+    favorite() {
+      const favorite = {
+        favoriteUserId: this.userInfo.userId,
+        favoriteBlogId: this.blogId,
+      };
+      return favorite;
+    },
+    follow() {
+      const follow = {
+        followUserId: this.blogDetail.blogAuthorId,
+        followFanId: this.userInfo.userId,
+      };
+      return follow;
+    },
   },
   methods: {
-    show() {
-      console.log(this.comments);
-      console.log(this.hasComment);
-    },
     getBlog(blogId) {
       // this.blogLoading = true;
       request({
@@ -214,7 +301,9 @@ export default {
         if (res.data.data) {
           this.blogDetail = res.data.data;
           this.blogLoading = false;
-          console.log(this.blogLoading);
+          this.checkFavorite();
+          this.checkFollow();
+          // console.log(this.blogLoading);
         }
       });
     },
@@ -305,6 +394,133 @@ export default {
       this.placeholder = "发一条友善的评论";
       this.replyCommentId = "";
       this.value = "";
+    },
+    showModal() {
+      this.visible = true;
+    },
+    select(index) {
+      this.choice = index;
+    },
+    handlePay() {
+      const map = {
+        user: {
+          userId: this.userInfo.userId,
+          balance: this.money[this.choice],
+        },
+        author: {
+          userId: this.blogDetail.blogAuthorId,
+        },
+      };
+      this.$message.loading("处理中，请稍等...", 0);
+      request({
+        url: "/user/reward",
+        method: "post",
+        data: map,
+      }).then((res) => {
+        if (res.data.data === true) {
+          console.log(res.data.data);
+          this.$message.success("感谢赞赏（づ￣3￣）づ╭❤～");
+          // 更新余额信息
+          const user = this.userInfo;
+          user.balance = user.balance - this.money[this.choice];
+          this.$store.commit("SET_USER_INFO", user);
+          this.visible = false;
+        } else if (res.data.data === false) {
+          console.log(res.data.data);
+          this.$message.warning("余额不足 ┌(。Д。)┐");
+          this.visible = false;
+        } else {
+          console.log(res.data.data);
+          this.$message.error("出现未知错误");
+          this.visible = false;
+        }
+      });
+    },
+    // 点赞收藏
+    checkFavorite() {
+      // console.log(this.favorite);
+      request({
+        url: "/favorite/check",
+        method: "post",
+        data: this.favorite,
+      }).then((res) => {
+        if (res.data.data) {
+          this.isFavorite = true;
+        }
+      });
+    },
+    addFavorite() {
+      this.$message.loading("请稍等...", 0);
+      request({
+        url: "/favorite/add",
+        method: "post",
+        data: this.favorite,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("收藏成功~");
+          this.isFavorite = true;
+        } else {
+          this.$message.error("error");
+        }
+      });
+    },
+    cancelFavorite() {
+      this.$message.loading("请稍等...", 0);
+      request({
+        url: "/favorite/cancel",
+        method: "post",
+        data: this.favorite,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("取消收藏成功~");
+
+          this.isFavorite = false;
+        } else {
+          this.$message.error("error");
+        }
+      });
+    },
+    // 关注
+    checkFollow() {
+      request({
+        url: "/follow/check",
+        method: "post",
+        data: this.follow,
+      }).then((res) => {
+        if (res.data.data) {
+          this.isFollow = true;
+        }
+      });
+    },
+    addFollow() {
+      this.$message.loading("请稍等...", 0);
+      request({
+        url: "/follow/add",
+        method: "post",
+        data: this.follow,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("关注成功~");
+          this.isFollow = true;
+        } else {
+          this.$message.error("error");
+        }
+      });
+    },
+    cancelFollow() {
+      this.$message.loading("请稍等...", 0);
+      request({
+        url: "/follow/cancel",
+        method: "post",
+        data: this.follow,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("取关成功~");
+          this.isFollow = false;
+        } else {
+          this.$message.error("error");
+        }
+      });
     },
   },
 };
@@ -429,6 +645,16 @@ export default {
         vertical-align: center;
         margin-left: auto;
         margin-top: 9px;
+        .follow {
+          background: #00a1d6;
+          border-radius: 4px;
+          border: 0;
+        }
+        .followed {
+          background: rgba(0, 0, 0, 0.45);
+          border-radius: 4px;
+          border: 0;
+        }
       }
     }
   }
@@ -488,5 +714,102 @@ export default {
     padding: 30px 0;
     font-size: 12px;
   }
+}
+.charge-modal-container {
+  text-align: center;
+  padding: 24px 40px;
+  .title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    img {
+      width: 50px;
+      border-radius: 50%;
+      border: 1px solid #eee;
+    }
+    .content {
+      font-size: 24px;
+      font-weight: 500;
+      margin-left: 16px;
+      color: #404040;
+    }
+  }
+  .money-btn-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 162.5px;
+    height: 56px;
+    font-size: 16px;
+    color: #969696;
+    margin-bottom: 12px;
+    margin-right: 12px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    &:nth-child(3) {
+      margin-right: 0;
+    }
+    &:nth-child(6) {
+      margin-right: 0;
+    }
+    & > span {
+      font-size: 28px;
+      font-style: italic;
+    }
+  }
+  .selected {
+    border-color: #00a1d6;
+    color: #00a1d6;
+  }
+  .choose-method {
+    font-size: 15px;
+    margin: 12px 0;
+    color: #404040;
+  }
+  .method-btn-group {
+    display: flex;
+  }
+  .pay-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 162.5px;
+    height: 56px;
+    font-size: 30px;
+    // color: #969696;
+    margin-bottom: 12px;
+    margin-right: 12px;
+    border-radius: 10px;
+    border: 1px dashed #eee;
+    cursor: not-allowed;
+    opacity: 0.5;
+    &:nth-child(3) {
+      margin-right: 0;
+      cursor: pointer;
+      opacity: 1;
+      border: 1px solid #00a1d6;
+    }
+    & > span {
+      font-size: 16px;
+      font-style: normal;
+      margin-left: 4px;
+    }
+  }
+}
+.handle-btn {
+  height: 44px;
+  font-size: 18px;
+  font-weight: normal;
+  padding: 0px 48px;
+  margin-bottom: 20px;
+  background-color: #00a1d6;
+  border-color: #00a1d6;
 }
 </style>

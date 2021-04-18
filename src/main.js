@@ -19,7 +19,7 @@ Vue.use(VueCropper);
 Vue.use(mavonEditor);
 
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: "//at.alicdn.com/t/font_2484263_haneq2ec6ca.js", // 在 iconfont.cn 上生成
+  scriptUrl: "//at.alicdn.com/t/font_2484263_qzzr4tvlw1e.js", // 在 iconfont.cn 上生成
 });
 
 message.config({
