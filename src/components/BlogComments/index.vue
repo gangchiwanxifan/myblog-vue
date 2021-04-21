@@ -28,9 +28,19 @@
             >
               <a-icon type="edit" theme="filled" /> 回复
             </a>
-            <a v-if="comment.commentUserId == userId">
-              <a-icon type="delete" theme="filled" /> 删除
-            </a>
+            <a-popconfirm
+              v-if="comment.commentUserId == userId"
+              okText="确认"
+              cancelText="取消"
+              @confirm="deleteComment(comment)"
+            >
+              <div slot="title" class="message-title">
+                <p>删除评论后，评论下所有回复都会被删除</p>
+                <p>是否继续？</p>
+              </div>
+              <span slot="icon" />
+              <a><a-icon type="delete" theme="filled" /> 删除</a>
+            </a-popconfirm>
           </span>
         </div>
       </div>
@@ -49,6 +59,7 @@
 
 <script>
 import { timeTransform } from "@/utils/util";
+import request from "@/utils/request";
 
 export default {
   name: "BlogComments",
@@ -74,8 +85,20 @@ export default {
       // console.log(comment);
       this.$emit("reply", comment);
     },
-    test() {
-      console.log();
+    deleteComment(comment) {
+      this.$message.loading("正在删除，请稍等...");
+      request({
+        url: "/comment/delete",
+        method: "post",
+        data: comment,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("删除成功");
+          this.$emit("updateComment");
+        } else {
+          this.$message.error("error");
+        }
+      });
     },
   },
 };
@@ -150,5 +173,26 @@ export default {
       margin-right: 10px;
     }
   }
+}
+</style>
+
+<style lang="less">
+.message-title {
+  text-align: center;
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #222222;
+  }
+}
+.ant-popover-buttons {
+  margin-bottom: 0px;
+  text-align: center;
+  button {
+    font-size: 12px;
+  }
+}
+.ant-popover-message-title {
+  padding-left: 0px;
 }
 </style>

@@ -13,4 +13,8 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(() => {
   NProgress.done();
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 });

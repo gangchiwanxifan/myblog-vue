@@ -11,7 +11,13 @@
             <div>
               <span id="h-name"
                 >{{ userInfo.nickname }}
-                <icon-font :type="icon[userInfo.sex]" />
+                <icon-font
+                  :type="
+                    icon[userInfo.sex]
+                      ? icon[userInfo.sex]
+                      : 'icon - gougouchushou'
+                  "
+                />
               </span>
             </div>
             <div class="h-basic-spacing">
@@ -19,7 +25,24 @@
             </div>
           </div>
           <div class="h-side">
-            <div class="h-side2"><a-button>关注</a-button></div>
+            <div class="h-side-follow">
+              <a-button
+                v-if="!isFollow"
+                class="follow-btn"
+                type="primary"
+                @click="addFollow"
+              >
+                关注
+              </a-button>
+              <a-button
+                v-else
+                class="followed-btn"
+                type="primary"
+                @click="cancelFollow"
+              >
+                已关注
+              </a-button>
+            </div>
           </div>
         </div>
       </div>
@@ -40,9 +63,23 @@
       <follow-page v-else-if="noTitleKey === 'follow'"></follow-page>
       <fans-page v-else-if="noTitleKey === 'fans'"></fans-page>
       <span slot="tabBarExtraContent">
-        <a @click="onSideChange('follow')"><a-icon type="star" />我的关注</a>
+        <a
+          @click="onSideChange('follow')"
+          class="tab-link"
+          :class="{ 'active-link': noTitleKey === 'follow' }"
+        >
+          <a-icon type="star" />
+          {{ this.homeId == this.userId ? "我的关注" : "TA的关注" }}
+        </a>
         <a-divider type="vertical"></a-divider>
-        <a @click="onSideChange('fans')"><a-icon type="team" />我的粉丝</a>
+        <a
+          @click="onSideChange('fans')"
+          class="tab-link"
+          :class="{ 'active-link': noTitleKey === 'fans' }"
+        >
+          <a-icon type="team" />
+          {{ this.homeId == this.userId ? "我的粉丝" : "TA的粉丝" }}
+        </a>
       </span>
     </a-card>
   </div>
@@ -70,6 +107,25 @@ const list2 = [
   },
 ];
 
+const list1 = [
+  {
+    key: "home",
+    tab: "主页",
+  },
+  {
+    key: "blog",
+    tab: "文章",
+  },
+  {
+    key: "catagory",
+    tab: "文集",
+  },
+  {
+    key: "notice",
+    tab: "消息",
+  },
+];
+
 export default {
   components: {
     HomePage,
@@ -84,26 +140,10 @@ export default {
       bgImg: "/center.png",
       img: "/avatar.png",
       userInfo: {},
-      tabListNoTitle: [
-        {
-          key: "home",
-          tab: "主页",
-        },
-        {
-          key: "blog",
-          tab: "文章",
-        },
-        {
-          key: "catagory",
-          tab: "文集",
-        },
-        {
-          key: "notice",
-          tab: "通知",
-        },
-      ],
+      tabListNoTitle: list1,
       icon: ["icon-gougouchushou", "icon-nan", "icon-nv1"],
       noTitleKey: "home",
+      isFollow: false,
     };
   },
   mounted() {
@@ -113,6 +153,7 @@ export default {
       this.tabListNoTitle = list2;
       this.getUser();
     }
+    this.checkFollow();
   },
   computed: {
     homeId() {
@@ -120,6 +161,13 @@ export default {
     },
     userId() {
       return this.$store.state.user.userInfo.userId;
+    },
+    follow() {
+      const follow = {
+        followUserId: this.homeId,
+        followFanId: this.userId,
+      };
+      return follow;
     },
   },
   methods: {
@@ -141,12 +189,62 @@ export default {
         }
       });
     },
+    checkFollow() {
+      request({
+        url: "/follow/check",
+        method: "post",
+        data: this.follow,
+      }).then((res) => {
+        if (res.data.data) {
+          this.isFollow = true;
+        } else {
+          this.isFollow = false;
+        }
+      });
+    },
+    addFollow() {
+      if (this.userId == this.homeId) {
+        this.$message.info("o(*￣▽￣*)ブ你时时刻刻都在关注你自己~");
+      } else {
+        this.$message.loading("请稍等...", 0);
+        request({
+          url: "/follow/add",
+          method: "post",
+          data: this.follow,
+        }).then((res) => {
+          if (res.data.data) {
+            this.$message.success("关注成功~");
+            this.isFollow = true;
+          } else {
+            this.$message.error("error");
+          }
+        });
+      }
+    },
+    cancelFollow() {
+      this.$message.loading("请稍等...", 0);
+      request({
+        url: "/follow/cancel",
+        method: "post",
+        data: this.follow,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("取关成功~");
+          this.isFollow = false;
+        } else {
+          this.$message.error("error");
+        }
+      });
+    },
   },
   watch: {
     $route(to, from) {
       //监听路由是否变化
       if (to.params != from.params) {
+        this.checkFollow();
+        this.noTitleKey = "home";
         if (this.homeId == this.userId) {
+          this.tabListNoTitle = list1;
           this.userInfo = this.$store.state.user.userInfo;
         } else {
           this.tabListNoTitle = list2;
@@ -236,10 +334,27 @@ export default {
       position: absolute;
       right: 0;
       bottom: 0;
-      .h-side2 {
-        margin: 0 20px 17px 0;
+      .h-side-follow {
+        margin: 0 30px 17px 0;
+        .follow-btn {
+          width: 76px;
+          box-shadow: 0 0 0 2px #fff;
+          background: #fb7299;
+        }
+        .followed-btn {
+          width: 76px;
+          background: rgba(0, 0, 0, 0.45);
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 30%);
+          border-color: transparent;
+        }
       }
     }
   }
+}
+.tab-link {
+  color: #99a2aa;
+}
+.active-link {
+  color: #fa541c !important;
 }
 </style>

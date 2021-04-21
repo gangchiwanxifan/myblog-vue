@@ -6,7 +6,9 @@
       :style="{ height: '100%' }"
     >
       <div class="page-head">
-        <p class="page-head-title">我的粉丝</p>
+        <p class="page-head-title">
+          {{ this.homeId == this.userId ? "我的粉丝" : "TA的粉丝" }}
+        </p>
       </div>
       <a-spin :spinning="loading" size="large">
         <a-list
@@ -38,7 +40,9 @@
               <a-button
                 type="primary"
                 style="background-color: rgb(251, 114, 153); border: 0"
-                ><a-icon type="home" />TA的主页</a-button
+                @click="$router.push({ path: `/center/${item.followFanId}` })"
+              >
+                <a-icon type="home" />TA的主页</a-button
               >
             </div>
           </a-list-item>
@@ -68,6 +72,9 @@ export default {
   computed: {
     homeId() {
       return this.$route.params.userId;
+    },
+    userId() {
+      return this.$store.state.user.userInfo.userId;
     },
   },
   methods: {

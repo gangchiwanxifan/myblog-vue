@@ -63,7 +63,7 @@
                     </div>
                     <a
                       slot="title"
-                      href="https://www.antdv.com/"
+                      @click="$router.push({ path: `/blog/${item.blogId}` })"
                       :style="{
                         color: '#000',
                         fontSize: '17px',

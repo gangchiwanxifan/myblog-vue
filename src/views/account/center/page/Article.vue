@@ -39,7 +39,7 @@
                   </div>
                   <a
                     slot="title"
-                    href="https://www.antdv.com/"
+                    @click="$router.push({ path: `/blog/${item.blogId}` })"
                     :style="{
                       color: '#000',
                       fontSize: '17px',
@@ -80,8 +80,13 @@
                 />
                 <a-list-item-meta>
                   <a
+                    :style="{
+                      color: '#222',
+                      fontSize: '17px',
+                      fontWeight: '500',
+                    }"
                     slot="title"
-                    :href="'#/blog/' + item.blogId"
+                    @click="$router.push({ path: `/blog/${item.blogId}` })"
                     class="list-title"
                     >{{ item.blogTitle }}</a
                   >

@@ -12,26 +12,44 @@
             :style="{ border: '0', width: '100%' }"
             :selectedKeys="selectedKeys"
           >
-            <a-menu-item key="1" @click="updateMenu('1')">最新通知</a-menu-item>
-            <a-menu-item key="2" @click="updateMenu('2')">全部通知</a-menu-item>
+            <a-menu-item key="0" @click="updateMenu('0')">最新消息</a-menu-item>
+            <a-menu-item key="1" @click="updateMenu('1')">历史消息</a-menu-item>
           </a-menu>
         </div>
         <div class="page-notice-right">
-          <a-list>
-            <a-list-item :key="index" v-for="(item, index) in activity">
-              <a-list-item-meta>
-                <a-avatar slot="avatar" :src="item.user.avatar" />
-                <div slot="title">
-                  <span>{{ item.user.nickname }}</span
-                  >&nbsp; 在&nbsp;<a href="#">{{ item.project.name }}</a
-                  >&nbsp; <span>{{ item.project.action }}</span
-                  >&nbsp;
-                  <a href="#">{{ item.project.event }}</a>
-                </div>
-                <div slot="description">{{ item.time }}</div>
-              </a-list-item-meta>
-            </a-list-item>
-          </a-list>
+          <a-spin :spinning="loading">
+            <a-list>
+              <a-list-item :key="index" v-for="(item, index) in data">
+                <a
+                  v-if="selectedKeys[0] == 0"
+                  slot="actions"
+                  @click="hasCheck(item.noticeId)"
+                  >标为已读</a
+                >
+                <a-list-item-meta>
+                  <a-avatar slot="avatar" :src="item.avatar" />
+                  <div slot="title">
+                    <a
+                      @click="
+                        $router.push({ path: `/center/${item.noticeSendId}` })
+                      "
+                    >
+                      {{ item.nickname }} </a
+                    >&nbsp; <span> {{ event[item.event] }} </span>&nbsp;
+                    <a
+                      v-if="item.noticeBlogId"
+                      @click="
+                        $router.push({ path: `/blog/${item.noticeBlogId}` })
+                      "
+                    >
+                      {{ "《" + item.blogTitle + "》" }}
+                    </a>
+                  </div>
+                  <div slot="description">{{ item.createTime | timefix }}</div>
+                </a-list-item-meta>
+              </a-list-item>
+            </a-list>
+          </a-spin>
         </div>
       </div>
     </a-card>
@@ -40,100 +58,43 @@
 
 <script>
 import request from "@/utils/request";
-const activity = [
-  {
-    id: 1,
-    user: {
-      nickname: "@name",
-      avatar:
-        "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png",
-    },
-    project: {
-      name: "白鹭酱油开发组",
-      action: "更新",
-      event: "番组计划",
-    },
-    time: "2018-08-23 14:47:00",
-  },
-  {
-    id: 1,
-    user: {
-      nickname: "蓝莓酱",
-      avatar:
-        "https://gw.alipayobjects.com/zos/rmsportal/jZUIxmJycoymBprLOUbT.png",
-    },
-    project: {
-      name: "白鹭酱油开发组",
-      action: "更新",
-      event: "番组计划",
-    },
-    time: "2018-08-23 09:35:37",
-  },
-  {
-    id: 1,
-    user: {
-      nickname: "@name",
-      avatar: "@image(64x64)",
-    },
-    project: {
-      name: "白鹭酱油开发组",
-      action: "创建",
-      event: "番组计划",
-    },
-    time: "2017-05-27 00:00:00",
-  },
-  {
-    id: 1,
-    user: {
-      nickname: "曲丽丽",
-      avatar: "@image(64x64)",
-    },
-    project: {
-      name: "高逼格设计天团",
-      action: "更新",
-      event: "六月迭代",
-    },
-    time: "2018-08-23 14:47:00",
-  },
-  {
-    id: 1,
-    user: {
-      nickname: "@name",
-      avatar: "@image(64x64)",
-    },
-    project: {
-      name: "高逼格设计天团",
-      action: "created",
-      event: "六月迭代",
-    },
-    time: "2018-08-23 14:47:00",
-  },
-  {
-    id: 1,
-    user: {
-      nickname: "曲丽丽",
-      avatar:
-        "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png",
-    },
-    project: {
-      name: "高逼格设计天团",
-      action: "created",
-      event: "六月迭代",
-    },
-    time: "2018-08-23 14:47:00",
-  },
+import { timeTransform } from "@/utils/util";
+
+const event = [
+  "关注了你",
+  "收藏了你的文章",
+  "评论了你的文章",
+  "回复了你的评论",
+  "打赏了你的文章",
 ];
 
 export default {
   mounted() {
-    this.getDrafts();
+    this.getNotice(0);
   },
   data() {
     return {
-      activity,
+      event,
+      loading: true,
       data: [],
-      selectedKeys: ["1"],
+      selectedKeys: ["0"],
     };
+  },
+  computed: {
+    userId() {
+      return this.$store.state.user.userInfo.userId;
+    },
+  },
+  watch: {
+    selectedKeys() {
+      this.getNotice(...this.selectedKeys);
+    },
+  },
+  filters: {
+    timefix: function (value) {
+      const time = timeTransform(value);
+      return time;
+    },
   },
   methods: {
     updateMenu(selectedKey) {
@@ -141,9 +102,38 @@ export default {
         this.selectedKeys = [selectedKey];
       }
     },
-    getDrafts() {
-      // const userId = this.$store.state.user.userInfo.userId;
-      request({});
+    getNotice(status) {
+      this.loading = true;
+      const notice = {
+        noticeUserId: this.userId,
+        noticeStatus: status,
+      };
+      request({
+        url: "/notice/list",
+        method: "post",
+        data: notice,
+      }).then((res) => {
+        if (res.data.data) {
+          this.data = res.data.data;
+          this.loading = false;
+        }
+      });
+    },
+    hasCheck(noticeId) {
+      const notice = {
+        noticeId: noticeId,
+        noticeStatus: 1,
+      };
+      request({
+        url: "/notice/update",
+        method: "post",
+        data: notice,
+      }).then((res) => {
+        if (res.data.data) {
+          this.$message.success("success!");
+          this.data = this.data.filter((notice) => notice.noticeId != noticeId);
+        }
+      });
     },
   },
 };
@@ -156,6 +146,7 @@ export default {
     width: 100%;
     display: flex;
     height: 100%;
+    min-height: 40vh;
     .page-notice-left {
       border-right: 1px solid #e8e8e8;
       width: 210px;

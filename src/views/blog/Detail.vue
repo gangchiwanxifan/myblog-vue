@@ -19,8 +19,12 @@
     <a-spin :spinning="blogLoading" size="large">
       <a-card class="page-container-card" :bordered="false">
         <div class="page-title">
-          <a class="favorite" v-if="!isFavorite"><a-icon type="plus" /> 收藏</a>
-          <a class="favorite" v-else><a-icon type="check" /> 已收藏</a>
+          <a class="favorite" v-if="!isFavorite" @click="addFavorite">
+            <a-icon type="plus" /> 收藏
+          </a>
+          <a class="favorite" v-else @click="cancelFavorite">
+            <a-icon type="check" /> 已收藏
+          </a>
           <h1 class="page-title-blog">
             <span>{{ blogDetail.blogTitle }}</span>
           </h1>
@@ -166,7 +170,11 @@
         <div>
           <div v-if="!hasComment" class="no-reply">看看下面~来抢沙发吧</div>
           <div v-else>
-            <blog-comments @reply="reply" :comments="comments" />
+            <blog-comments
+              @updateComment="updateComment"
+              @reply="reply"
+              :comments="comments"
+            />
             <div class="no-reply">没有更多评论</div>
           </div>
         </div>
@@ -323,6 +331,9 @@ export default {
     showEmoji() {
       this.emojiVisible = !this.emojiVisible;
     },
+    updateComment() {
+      this.getComments(this.blogId);
+    },
     closeSel(event) {
       var showBtn = document.getElementById("show-btn");
       var emojiBox = document.getElementById("emoji-box");
@@ -359,6 +370,7 @@ export default {
           commentContent: this.value,
           parentId: this.replyCommentId,
         };
+        this.$message.loading("正在评论，请稍等...", 0);
         request({
           url: "/comment/save",
           method: "post",
@@ -410,6 +422,9 @@ export default {
         author: {
           userId: this.blogDetail.blogAuthorId,
         },
+        fakeUser: {
+          userId: this.blogDetail.blogId,
+        },
       };
       this.$message.loading("处理中，请稍等...", 0);
       request({
@@ -426,9 +441,9 @@ export default {
           this.$store.commit("SET_USER_INFO", user);
           this.visible = false;
         } else if (res.data.data === false) {
-          console.log(res.data.data);
-          this.$message.warning("余额不足 ┌(。Д。)┐");
-          this.visible = false;
+          // console.log(res.data.data);
+          this.$message.info("余额不足 ┌(。Д。)┐");
+          // this.visible = false;
         } else {
           console.log(res.data.data);
           this.$message.error("出现未知错误");
@@ -489,23 +504,29 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.isFollow = true;
+        } else {
+          this.isFollow = false;
         }
       });
     },
     addFollow() {
-      this.$message.loading("请稍等...", 0);
-      request({
-        url: "/follow/add",
-        method: "post",
-        data: this.follow,
-      }).then((res) => {
-        if (res.data.data) {
-          this.$message.success("关注成功~");
-          this.isFollow = true;
-        } else {
-          this.$message.error("error");
-        }
-      });
+      if (this.userInfo.userId == this.blogDetail.blogAuthorId) {
+        this.$message.info("o(*￣▽￣*)ブ你时时刻刻都在关注你自己~");
+      } else {
+        this.$message.loading("请稍等...", 0);
+        request({
+          url: "/follow/add",
+          method: "post",
+          data: this.follow,
+        }).then((res) => {
+          if (res.data.data) {
+            this.$message.success("关注成功~");
+            this.isFollow = true;
+          } else {
+            this.$message.error("error");
+          }
+        });
+      }
     },
     cancelFollow() {
       this.$message.loading("请稍等...", 0);
@@ -654,6 +675,7 @@ export default {
           background: rgba(0, 0, 0, 0.45);
           border-radius: 4px;
           border: 0;
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 30%);
         }
       }
     }

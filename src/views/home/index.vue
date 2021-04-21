@@ -18,9 +18,10 @@
               >
                 <a-list-item
                   slot="renderItem"
-                  key="item.title"
+                  :key="item.title"
                   slot-scope="item"
                 >
+                  <!-- {{ item }} -->
                   <img
                     slot="extra"
                     height="125px"
