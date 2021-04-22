@@ -7,8 +7,11 @@
       :placeholder="placeholder"
       @focus="changeBtn"
       @blur="recoverBtn"
+      @keyup.enter="search()"
     />
-    <a class="search-btn" :style="btnStyle"><a-icon type="search" /></a>
+    <a class="search-btn" :style="btnStyle" @click="search()">
+      <a-icon type="search" />
+    </a>
   </div>
 </template>
 
@@ -22,6 +25,9 @@ const placeholders = [
 
 export default {
   data() {
+    this.$message.config({
+      top: `50px`,
+    });
     return {
       content: "",
       placeholder:
@@ -35,6 +41,17 @@ export default {
     },
     recoverBtn() {
       this.btnStyle = {};
+    },
+    search() {
+      if (this.content) {
+        this.$router.push({
+          path: "/search",
+          query: { keyword: this.content },
+        });
+        this.content = "";
+      } else {
+        this.$message.info("请输入搜索内容");
+      }
     },
   },
 };

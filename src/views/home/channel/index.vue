@@ -271,7 +271,7 @@ export default {
 <style lang="less" scoped>
 .container-index {
   background-color: #fff;
-  border-top: 1px solid #e7e7e7;
+  // border-top: 1px solid #e7e7e7;
 }
 .page-main {
   display: flex;

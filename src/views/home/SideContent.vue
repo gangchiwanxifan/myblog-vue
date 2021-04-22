@@ -9,9 +9,15 @@
       </div>
       <div class="side-notice">
         <a-spin :spinning="noticeLoading">
-          <div>content...</div>
-          <div>content...</div>
-          <div>content...</div>
+          <div class="notice-container">
+            <icon-font
+              style="font-size: 25px; margin-right: 15px"
+              type="icon-yinyong"
+            />
+            <span style="color: #6d757a; line-height: 30px">
+              欢迎来到Simple Blog，基于Nginx的高可用内容创作社区🎉🎉🎉
+            </span>
+          </div>
         </a-spin>
       </div>
     </div>
@@ -60,9 +66,38 @@
       </div>
       <div class="side-links">
         <a-spin :spinning="linkLoading">
-          <div>content...</div>
-          <div>content...</div>
-          <div>content...</div>
+          <div class="link-container">
+            <div class="link-item">
+              <a
+                target="_blank"
+                href="https://github.com/gangchiwanxifan/myblog-vue"
+              >
+                <a-icon class="link-icon" type="github" />
+                <span>myblog-vue</span>
+              </a>
+            </div>
+            <div class="link-item">
+              <a
+                target="_blank"
+                href="https://github.com/gangchiwanxifan/myblog-springboot"
+              >
+                <a-icon class="link-icon" type="github" />
+                <span>myblog-springboot</span>
+              </a>
+            </div>
+            <div class="link-item">
+              <a target="_blank" href="https://www.bilibili.com/">
+                <icon-font class="link-icon" type="icon-bilibili" />
+                <span>哔哩哔哩</span>
+              </a>
+            </div>
+            <div class="link-item">
+              <a target="_blank" href="https://www.jianshu.com/">
+                <icon-font class="link-icon" type="icon-jianshu" />
+                <span>简书</span>
+              </a>
+            </div>
+          </div>
         </a-spin>
       </div>
     </div>
@@ -76,9 +111,9 @@ export default {
   name: "sideContent",
   data() {
     return {
-      noticeLoading: true,
+      noticeLoading: false,
       listLoading: true,
-      linkLoading: true,
+      linkLoading: false,
       blogList: [],
     };
   },
@@ -151,6 +186,31 @@ export default {
         color: #222;
         font-size: 12px;
       }
+    }
+  }
+}
+.notice-container {
+  margin-top: 10px;
+  width: 200px;
+  min-height: 12vh;
+  margin-bottom: 30px;
+}
+.link-container {
+  margin-top: 10px;
+  .link-item {
+    line-height: 35px;
+    a {
+      // color: #222222;
+      color: #6d757a;
+    }
+    .link-icon {
+      font-size: 16px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    span {
+      vertical-align: middle;
+      // font-size: 12px;
     }
   }
 }

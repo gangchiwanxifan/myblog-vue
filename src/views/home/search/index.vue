@@ -1,25 +1,26 @@
 <template>
-  <div class="container-index" style="background-color: #fff">
+  <div class="container-index">
     <div style="max-width: 1000px; margin: 0 auto">
-      <a-row :gutter="24">
-        <a-col :span="16">
-          <a-carousel autoplay style="padding: 12px 0px">
-            <img src="/swiper/img2.png" alt="图片加载失败" />
-            <img src="/swiper/img1.png" alt="图片加载失败" />
-          </a-carousel>
-          <a-card :bordered="false" :bodyStyle="{ padding: '12px 0px' }">
-            <a-spin :spinning="loading" size="large">
-              <a-list
-                item-layout="vertical"
-                size="large"
-                :pagination="pagination"
-                :data-source="data"
+      <a-tabs default-active-key="1">
+        <a-tab-pane key="1">
+          <span slot="tab">
+            搜索列表
+            <!-- <a-icon type="search" /> -->
+          </span>
+          <a-spin :spinning="loading" size="large">
+            <div class="total-wrap">
+              <span
+                >有关'{{ keyword }}'的搜索结果，共{{ data.length }}条数据</span
               >
+            </div>
+            <div v-if="data.length">
+              <a-list item-layout="vertical" size="large" :data-source="data">
                 <a-list-item
                   slot="renderItem"
                   :key="item.title"
                   slot-scope="item"
                 >
+                  <!-- {{ item }} -->
                   <img
                     slot="extra"
                     height="125px"
@@ -42,6 +43,9 @@
                           >{{ tag }}
                         </a-tag>
                       </span>
+                      <!-- <div class="description">
+                      {{ item.description }}
+                    </div> -->
                     </template>
                   </a-list-item-meta>
                   <div class="description">
@@ -91,69 +95,45 @@
                 <a-button>加载更多</a-button>
               </div> -->
               </a-list>
-            </a-spin>
-          </a-card>
-        </a-col>
-        <a-col :span="8">
-          <side-content />
-        </a-col>
-      </a-row>
+            </div>
+            <div v-else class="no-data" />
+          </a-spin>
+        </a-tab-pane>
+      </a-tabs>
     </div>
   </div>
 </template>
 
 <script>
 import request from "@/utils/request";
-import SideContent from "./SideContent";
 
 export default {
-  components: {
-    SideContent,
-  },
   data() {
     return {
-      data: [],
       loading: true,
-      pagination: {
-        onChange: () => {
-          document.documentElement.scrollTop = 200;
-        },
-        pageSize: 7,
-      },
-      actions: [
-        { type: "user", text: "gcwxf" },
-        { type: "heart", text: "156" },
-        { type: "message", text: "2" },
-      ],
+      data: [],
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
     };
   },
   mounted() {
+    this.keyword = this.$route.query.keyword;
     this.getList();
   },
-  computed: {
-    // blogList() {
-    //   if (this.data) {
-    //     const list = this.data;
-    //     for (let i = 0; i < list.length; i++) {
-    //       list[i].blogTags = list[i].blogTags.split(",");
-    //       // console.log(list[i].blogTas);
-    //     }
-    //     return list;
-    //   } else {
-    //     return [];
-    //   }
-    // },
-    // blogLink: function (blogId) {
-    //   const link = "#/blog/" + blogId;
-    //   return link;
-    // },
+  computed: {},
+  watch: {
+    $route(to, from) {
+      if (to.query != from.query) {
+        this.getList();
+      }
+    },
   },
   methods: {
     getList() {
+      this.loading = true;
       request({
-        url: "/blog/list",
-        method: "get",
+        url: "/blog/search",
+        method: "post",
+        data: { keyword: this.$route.query.keyword },
       }).then((res) => {
         if (res.data.data) {
           this.data = res.data.data;
@@ -165,21 +145,34 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .container-index {
   background-color: #fff;
-  /* border-top: 1px solid #e7e7e7; */
+  // border-top: 1px solid #e7e7e7;
+  min-height: 80vh;
 }
-.description {
-  color: #999;
+.no-data {
+  margin: 20px auto;
+  width: 100%;
+  height: 350px;
+  background: url(/no-data2.png) no-repeat center top #fff;
+  border-radius: 12px;
 }
-.list-title {
-  color: #333;
-  font-size: 18px;
-  font-weight: 500;
+/deep/ .ant-tabs-nav {
+  margin-top: 20px;
+  .ant-tabs-tab {
+    font-size: 18px;
+    color: #00a1d6;
+  }
+  .ant-tabs-ink-bar {
+    width: 100px;
+    background-color: #00a1d6;
+  }
 }
-.side-title {
-  color: #333;
-  font-weight: 800;
+.total-wrap {
+  line-height: 16px;
+  color: #99a2aa;
+  font-size: 12px;
+  // padding-left: 15px;
 }
 </style>

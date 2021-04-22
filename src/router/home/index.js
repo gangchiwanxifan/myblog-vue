@@ -10,4 +10,9 @@ export default [
     name: "about",
     component: () => import("@/views/home/channel"),
   },
+  {
+    path: "/search",
+    name: "search",
+    component: () => import("@/views/home/search"),
+  },
 ];

@@ -259,7 +259,7 @@ export default {
 <style lang="less" scoped>
 .page-wide {
   max-width: 1200px;
-  margin: 2px auto;
+  margin: 0px auto;
 }
 .h-inner {
   padding-top: 116px;

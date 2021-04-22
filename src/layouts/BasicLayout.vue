@@ -92,6 +92,9 @@ export default {
   padding: 0;
   .ant-top-nav-header {
     background-color: #fff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 8%);
+    position: relative;
+    z-index: 1;
     .ant-top-nav-header-main {
       height: 58px;
       max-width: 1200px;
