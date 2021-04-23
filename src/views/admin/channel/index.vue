@@ -1,7 +1,6 @@
 <template>
   <div>
     <page-header :management="management" />
-
     <a-card class="ant-card-body">
       <a-button class="add-btn" type="primary" @click="showAddModal"
         ><a-icon type="plus" />新建</a-button
@@ -50,14 +49,15 @@
             ]"
           />
         </a-form-item>
+        <!-- 上传图片 -->
         <a-form-item label="上传封面:">
-          <a-upload
-            v-decorator="['avatar']"
-            action="/api/upload"
-            list-type="picture"
-          >
-            <a-button> <a-icon type="upload" /> Click to upload </a-button>
-          </a-upload>
+          <div class="ant-upload-preview" @click="$refs.modal.edit(img)">
+            <!-- <a-icon type="cloud-upload-o" class="upload-icon" /> -->
+            <div class="mask">
+              <a-icon type="cloud-upload-o" />
+            </div>
+            <img :src="img" />
+          </div>
         </a-form-item>
         <a-form-item label="栏目描述:">
           <a-textarea
@@ -97,14 +97,14 @@
             ]"
           />
         </a-form-item>
+        <!-- 上传图片 -->
         <a-form-item label="上传封面:">
-          <a-upload
-            v-decorator="['avatar']"
-            action="/api/upload"
-            list-type="picture"
-          >
-            <a-button> <a-icon type="upload" /> Click to upload </a-button>
-          </a-upload>
+          <div class="ant-upload-preview" @click="$refs.modal.edit(img)">
+            <div class="mask">
+              <a-icon type="cloud-upload-o" />
+            </div>
+            <img :src="img" />
+          </div>
         </a-form-item>
         <a-form-item label="栏目描述:">
           <a-textarea
@@ -115,12 +115,15 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <avatar-modal :CropWidth="200" ref="modal" @ok="setImg" />
   </div>
 </template>
 
 <script>
 import pageHeader from "@/components/PageHeader";
 import request from "@/utils/request";
+import AvatarModal from "@/components/AvatarModal";
 
 const columns = [
   {
@@ -168,15 +171,26 @@ export default {
       // 编辑栏目对话框
       visible_edit: false,
       confirmLoading_edit: false,
+      img: "",
     };
   },
   components: {
     pageHeader,
+    AvatarModal,
   },
   mounted() {
     this.getList();
   },
   methods: {
+    setImg(url) {
+      if (url) {
+        this.$message.success("上传成功");
+        // console.log(url);
+        this.img = url;
+      } else {
+        this.$message.error("出现未知错误！");
+      }
+    },
     // 获取栏目列表
     getList() {
       this.loading = true;
@@ -190,8 +204,7 @@ export default {
     },
     // 添加栏目对话框
     showAddModal() {
-      // console.log(this.add_form.getFieldsValue());
-      // console.log(this.fileList);
+      this.img = "/catagory.png";
       this.visible_add = true;
     },
     handleAddOk() {
@@ -200,9 +213,7 @@ export default {
           this.confirmLoading_add = true;
           let channel = {
             channelName: values.channelName,
-            channelAvatar: values.avatar.fileList
-              ? values.avatar.fileList[0].response.data
-              : "/article.png",
+            channelAvatar: this.img,
             channelDescription: values.description,
           };
           request({
@@ -216,7 +227,6 @@ export default {
               this.visible_add = false;
               this.add_form.setFieldsValue({
                 channelName: "",
-                avatar: "",
                 description: "",
               });
               this.getList();
@@ -243,16 +253,69 @@ export default {
           });
         }, 100);
       });
+      this.img = record.channelAvatar;
       this.visible_edit = true;
       this.edit_form.setFieldsValue();
     },
     handleEditCancel() {
       this.visible_edit = false;
     },
-    handleEditOk() {},
+    handleEditOk() {
+      this.edit_form.validateFields((err, values) => {
+        if (!err) {
+          this.confirmLoading_edit = true;
+          let channel = {
+            channelId: values.channelId,
+            channelName: values.channelName,
+            channelAvatar: this.img,
+            channelDescription: values.channelDescription,
+          };
+          // console.log(channel);
+          request({
+            url: "/channel/update",
+            method: "post",
+            data: channel,
+          }).then((res) => {
+            if (res.data.data) {
+              this.$message.success("更新成功");
+              this.confirmLoading_edit = false;
+              this.visible_edit = false;
+              this.getList();
+            } else {
+              this.$message.error("更新失败");
+              this.confirmLoading_edit = false;
+              this.visible_edit = false;
+            }
+          });
+        }
+      });
+    },
     // 删除
     showDeleteConfirm(record) {
-      console.log(record);
+      const _this = this;
+      this.$confirm({
+        title: "确定删除该栏目?",
+        okText: "Yes",
+        okType: "danger",
+        cancelText: "No",
+        onOk() {
+          request({
+            url: "/channel/delete",
+            method: "post",
+            data: { id: record.channelId },
+          }).then((res) => {
+            if (res.data.data) {
+              _this.$message.success("删除成功");
+              _this.getList();
+            } else {
+              _this.$message.error("删除失败");
+            }
+          });
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
     },
   },
 };
@@ -265,6 +328,47 @@ export default {
     margin-top: -10px;
     margin-bottom: 15px;
     border-radius: 0;
+  }
+}
+.ant-upload-preview {
+  position: relative;
+  // margin: 0 auto;
+  width: 100%;
+  max-width: 100px;
+  border-radius: 5%;
+  box-shadow: 0 0 4px #ccc;
+  margin-left: 20px;
+  margin-top: 15px;
+
+  .mask {
+    opacity: 0;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: opacity 0.4s;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    i {
+      font-size: 2rem;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -1rem;
+      margin-top: -1rem;
+      color: #d6d6d6;
+    }
+  }
+
+  img,
+  .mask {
+    width: 100%;
+    max-width: 300px;
+    height: 100%;
+    border-radius: 5%;
+    overflow: hidden;
   }
 }
 </style>

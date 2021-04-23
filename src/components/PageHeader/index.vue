@@ -28,7 +28,7 @@ export default {
 <style lang="less" scoped>
 .page-header-wrap {
   background-color: #fff;
-  margin: 1px -15px;
+  margin: 0px -15px;
   .header-content {
     padding: 10px 24px;
   }

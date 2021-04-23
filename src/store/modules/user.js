@@ -4,6 +4,8 @@ const user = {
   state: {
     loginStatus: false,
     userInfo: {},
+    rememberMe: false,
+    account: {},
   },
   mutations: {
     SET_LOGIN_STATUS: (state, status) => {
@@ -11,6 +13,12 @@ const user = {
     },
     SET_USER_INFO: (state, info) => {
       state.userInfo = info;
+    },
+    SET_ACCOUNT: (state, account) => {
+      state.account = account;
+    },
+    SET_REMEMBER: (state, rememberMe) => {
+      state.rememberMe = rememberMe;
     },
   },
   actions: {
@@ -38,6 +46,11 @@ const user = {
     clearUserInfo({ commit }) {
       commit("SET_LOGIN_STATUS", false);
       commit("SET_USER_INFO", {});
+    },
+    // 取消记住密码
+    clearRemember({ commit }) {
+      commit("SET_ACCOUNT", {});
+      commit("SET_REMEMBER", false);
     },
   },
 };

@@ -14,7 +14,10 @@
         <SiderMenu />
       </a-layout-sider>
       <a-layout>
-        <a-layout-header style="background: #fff; padding: 0">
+        <a-layout-header
+          class="admin-header"
+          style="background: #fff; padding: 0"
+        >
           <a-icon
             class="trigger"
             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
@@ -60,6 +63,10 @@ export default {
 }
 .trigger:hover {
   background-color: #eeeeee;
+}
+.admin-header {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 8%);
+  position: relative;
 }
 .header {
   float: right;

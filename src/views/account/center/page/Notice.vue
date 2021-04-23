@@ -18,7 +18,7 @@
         </div>
         <div class="page-notice-right">
           <a-spin :spinning="loading">
-            <a-list>
+            <a-list :pagination="pagination">
               <a-list-item :key="index" v-for="(item, index) in data">
                 <a
                   v-if="selectedKeys[0] == 0"
@@ -75,6 +75,13 @@ export default {
   data() {
     return {
       event,
+      pagination: {
+        // onChange: () => {
+        //   document.documentElement.scrollTop = 200;
+        // },
+        pageSize: 7,
+        hideOnSinglePage: true,
+      },
       loading: true,
       data: [],
       selectedKeys: ["0"],

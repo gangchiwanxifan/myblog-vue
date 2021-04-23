@@ -84,9 +84,26 @@ export default {
     this.form = this.$form.createForm(this);
     return {};
   },
+  computed: {
+    account() {
+      return this.$store.state.user.account;
+    },
+    rememberMe() {
+      return this.$store.state.user.rememberMe;
+    },
+  },
   mounted() {
     //绑定事件
     window.addEventListener("keydown", this.keyDown);
+    if (this.rememberMe) {
+      setTimeout(() => {
+        this.form.setFieldsValue({
+          username: this.account.username,
+          password: this.account.password,
+          rememberMe: this.rememberMe,
+        });
+      }, 100);
+    }
   },
   methods: {
     keyDown(e) {
@@ -102,6 +119,10 @@ export default {
             username: values.username,
             password: values.password,
           };
+          let userCopy = {
+            username: values.username,
+            password: values.password,
+          };
           user.password = md5(values.password);
           this.$message.loading("登录中，请稍等...", 0);
           request({
@@ -109,11 +130,21 @@ export default {
             method: "post",
             data: user,
           }).then((res) => {
-            let id = res.data.data;
-            if (id) {
-              this.$store.dispatch("fetchUserInfo", id);
-              this.$router.push("/");
-              this.$message.success("登陆成功", 1);
+            if (res.data.data) {
+              const info = res.data.data;
+              if (info.locked == 0) {
+                this.$store.dispatch("fetchUserInfo", info.userId);
+                this.$router.push("/");
+                this.$message.success("登陆成功", 1);
+                if (values.rememberMe) {
+                  this.$store.commit("SET_ACCOUNT", userCopy);
+                  this.$store.commit("SET_REMEMBER", true);
+                } else {
+                  this.$store.dispatch("clearRemember");
+                }
+              } else {
+                this.$message.warn("您的账号被锁定，请联系管理员~");
+              }
             } else {
               this.$message.error("用户名或密码错误！");
             }

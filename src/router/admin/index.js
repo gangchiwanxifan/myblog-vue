@@ -10,7 +10,26 @@ export default [
   },
   {
     path: "/admin/channel",
-    name: "channel",
     component: () => import("@/views/admin/channel"),
+  },
+  {
+    path: "/admin/blog",
+    component: () => import("@/views/admin/article"),
+  },
+  {
+    path: "/admin/comment",
+    component: () => import("@/views/admin/comment"),
+  },
+  {
+    path: "/admin/user",
+    component: () => import("@/views/admin/user"),
+  },
+  {
+    path: "/admin/role",
+    component: () => import("@/views/admin/role"),
+  },
+  {
+    path: "/admin/system",
+    component: () => import("@/views/admin/system"),
   },
 ];

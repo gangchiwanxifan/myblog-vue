@@ -3,15 +3,14 @@
     <page-header :management="management">
       <div class="page-header-content">
         <div>
-          <a-avatar class="avatar" size="large" src="/avatar.png" />
+          <a-avatar class="avatar" size="large" :src="userInfo.avatar" />
         </div>
         <div class="content">
           <div class="content-title">
-            {{ timeFix }}， gcwxf<span class="welcome-text"
-              >，{{ welcome }}</span
-            >
+            {{ timeFix }}， {{ userInfo.nickname
+            }}<span class="welcome-text">，{{ welcome }}</span>
           </div>
-          <div>前端工程师 | 蚂蚁金服 - 某某某事业群 - VUE平台</div>
+          <div>{{ userInfo.introduction }}</div>
         </div>
       </div>
     </page-header>
@@ -25,6 +24,11 @@ import { timeFix, welcome } from "@/utils/util";
 export default {
   components: {
     pageHeader,
+  },
+  computed: {
+    userInfo() {
+      return this.$store.state.user.userInfo;
+    },
   },
   data() {
     return {

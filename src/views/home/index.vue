@@ -9,12 +9,7 @@
           </a-carousel>
           <a-card :bordered="false" :bodyStyle="{ padding: '12px 0px' }">
             <a-spin :spinning="loading" size="large">
-              <a-list
-                item-layout="vertical"
-                size="large"
-                :pagination="pagination"
-                :data-source="data"
-              >
+              <a-list item-layout="vertical" size="large" :data-source="data">
                 <a-list-item
                   slot="renderItem"
                   :key="item.title"
@@ -87,9 +82,19 @@
                 </a-list-item>
 
                 <!-- footer -->
-                <!-- <div slot="footer" style="text-align: center; margin-top: 16px">
-                <a-button>加载更多</a-button>
-              </div> -->
+                <div slot="footer" style="text-align: center; margin: 16px 0">
+                  <a-button
+                    v-if="showMore && !loading"
+                    @click="loadMore"
+                    :loading="loadingMore"
+                    type="primary"
+                    shape="round"
+                    class="load-btn"
+                  >
+                    加载更多
+                  </a-button>
+                  <span class="load-text" v-else>w(ﾟДﾟ)w 没有更多啦~</span>
+                </div>
               </a-list>
             </a-spin>
           </a-card>
@@ -114,17 +119,15 @@ export default {
     return {
       data: [],
       loading: true,
-      pagination: {
-        onChange: () => {
-          document.documentElement.scrollTop = 200;
-        },
-        pageSize: 7,
-      },
-      actions: [
-        { type: "user", text: "gcwxf" },
-        { type: "heart", text: "156" },
-        { type: "message", text: "2" },
-      ],
+      // pagination: {
+      //   onChange: () => {
+      //     document.documentElement.scrollTop = 200;
+      //   },
+      //   pageSize: 7,
+      // },
+      pageNum: 1,
+      loadingMore: false,
+      showMore: true,
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
     };
   },
@@ -152,12 +155,30 @@ export default {
   methods: {
     getList() {
       request({
-        url: "/blog/list",
+        url: `/blog/page/${this.pageNum}`,
         method: "get",
       }).then((res) => {
         if (res.data.data) {
           this.data = res.data.data;
           this.loading = false;
+          if (res.data.data.length !== 6) {
+            this.showMore = false;
+          }
+        }
+      });
+    },
+    loadMore() {
+      this.loadingMore = true;
+      request({
+        url: `/blog/page/${++this.pageNum}`,
+        method: "get",
+      }).then((res) => {
+        if (res.data.data) {
+          this.data = this.data.concat(res.data.data);
+          this.loadingMore = false;
+          if (res.data.data.length !== 6) {
+            this.showMore = false;
+          }
         }
       });
     },
@@ -181,5 +202,12 @@ export default {
 .side-title {
   color: #333;
   font-weight: 800;
+}
+.load-btn {
+  width: 80%;
+}
+.load-text {
+  color: #99a2aa;
+  font-size: 12px;
 }
 </style>
