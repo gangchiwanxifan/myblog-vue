@@ -2,9 +2,9 @@
   <div>
     <page-header :management="management" />
     <a-card class="ant-card-body">
-      <a-button class="add-btn" type="primary" @click="showAddModal"
-        ><a-icon type="plus" />新建</a-button
-      >
+      <a-button class="add-btn" type="primary" @click="showAddModal">
+        <a-icon type="plus" />新建
+      </a-button>
       <a-table
         :columns="columns"
         :data-source="data"

@@ -3,11 +3,16 @@
     <div style="max-width: 1000px; margin: 0 auto">
       <a-row :gutter="24">
         <a-col :span="16">
-          <a-carousel autoplay style="padding: 12px 0px">
-            <img src="/swiper/img2.png" alt="图片加载失败" />
-            <img src="/swiper/img1.png" alt="图片加载失败" />
+          <!-- <a-spin :spinning="loading" size="large"> -->
+          <a-carousel autoplay style="padding: 12px 0px; min-height: 30vh">
+            <img :src="config.swiper1" alt="图片加载失败" />
+            <img :src="config.swiper2" alt="图片加载失败" />
           </a-carousel>
-          <a-card :bordered="false" :bodyStyle="{ padding: '12px 0px' }">
+          <!-- </a-spin> -->
+          <a-card
+            :bordered="false"
+            :bodyStyle="{ padding: '12px 0px', minHeight: '60vh' }"
+          >
             <a-spin :spinning="loading" size="large">
               <a-list item-layout="vertical" size="large" :data-source="data">
                 <a-list-item
@@ -93,14 +98,16 @@
                   >
                     加载更多
                   </a-button>
-                  <span class="load-text" v-else>w(ﾟДﾟ)w 没有更多啦~</span>
+                  <span class="load-text" v-else-if="!showMore && !loading"
+                    >w(ﾟДﾟ)w 没有更多啦~
+                  </span>
                 </div>
               </a-list>
             </a-spin>
           </a-card>
         </a-col>
         <a-col :span="8">
-          <side-content />
+          <side-content :notice="config.notice" />
         </a-col>
       </a-row>
     </div>
@@ -125,6 +132,7 @@ export default {
       //   },
       //   pageSize: 7,
       // },
+      config: {},
       pageNum: 1,
       loadingMore: false,
       showMore: true,
@@ -133,6 +141,7 @@ export default {
   },
   mounted() {
     this.getList();
+    this.getConfig();
   },
   computed: {
     // blogList() {
@@ -160,10 +169,23 @@ export default {
       }).then((res) => {
         if (res.data.data) {
           this.data = res.data.data;
+          // setTimeout(() => {
+          //   this.loading = false;
+          // }, 1000);
           this.loading = false;
           if (res.data.data.length !== 6) {
             this.showMore = false;
           }
+        }
+      });
+    },
+    getConfig() {
+      request({
+        url: "/config",
+        method: "post",
+      }).then((res) => {
+        if (res.data.data) {
+          this.config = res.data.data;
         }
       });
     },

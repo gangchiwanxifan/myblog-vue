@@ -1,23 +1,49 @@
 <template>
   <footer class="blog-footer">
     <p>
-      <a href="#">关于我们</a>
+      <a>关于我们</a>
       <span>|</span>
-      <a href="#">加入我们</a>
+      <a>加入我们</a>
       <span>|</span>
-      <a href="#">联系我们</a>
+      <a>联系我们</a>
       <span>|</span>
-      <a href="#">帮助中心</a>
+      <a>帮助中心</a>
     </p>
     <p>
-      <span>Copyright © Simple Blog Created by gcwxf</span>
-      <a href="#">浙ICP备 - xxxxxxx号 </a>
+      <span>{{ copyright }}</span>
+      <a>{{ record }}</a>
     </p>
   </footer>
 </template>
 
 <script>
-export default {};
+import request from "@/utils/request";
+
+export default {
+  data() {
+    return {
+      copyright: "Copyright © Simple Blog Created by gcwxf",
+      record: "浙ICP备 - xxxxxxx号",
+    };
+  },
+  mounted() {
+    this.getData();
+  },
+  methods: {
+    getData() {
+      request({
+        url: "/config",
+        method: "post",
+      }).then((res) => {
+        if (res.data.data) {
+          const data = res.data.data;
+          this.copyright = data.copyright;
+          this.record = data.record;
+        }
+      });
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>

@@ -15,7 +15,7 @@
               type="icon-yinyong"
             />
             <span style="color: #6d757a; line-height: 30px">
-              欢迎来到Simple Blog，基于Nginx的高可用内容创作社区🎉🎉🎉
+              {{ notice }}
             </span>
           </div>
         </a-spin>
@@ -25,12 +25,30 @@
     <div class="side-module">
       <div class="side-tabs">
         <span class="side-title">
-          <!-- <a-icon type="fire" theme="filled" /> -->
           <icon-font type="icon-fire" />
           热门文章
         </span>
+        <span
+          :style="{
+            float: 'right',
+            fontSize: '13px',
+            color: '#b4b4b4',
+            marginTop: '3px',
+            cursor: 'pointer',
+          }"
+          @click="getHotList"
+        >
+          <a-icon
+            :style="{
+              transform: `rotate(${role}deg)`,
+              transition: '.5s ease',
+            }"
+            type="sync"
+          />
+          换一批
+        </span>
       </div>
-      <div class="side-rank">
+      <div class="side-rank" :style="{ minHeight: '204px' }">
         <a-spin :spinning="listLoading">
           <div
             class="rank-item"
@@ -39,8 +57,11 @@
           >
             <span
               class="rank-index"
-              :class="{ 'rank-color-A': index < 3, 'rank-color-B': index >= 3 }"
-              >{{ index + 1 }}
+              :class="{
+                'rank-color-A': index < 3 && pageNum == 2,
+                'rank-color-B': index >= 3 || pageNum != 2,
+              }"
+              >{{ index + 5 * pageNum - 9 }}
             </span>
             <a-tooltip placement="right">
               <template slot="title">
@@ -97,6 +118,12 @@
                 <span>简书</span>
               </a>
             </div>
+            <div v-for="link in links" :key="link.linkId" class="link-item">
+              <a target="_blank" :href="link.linkUrl">
+                <a-icon class="link-icon" type="link" />
+                <span>{{ link.linkName }}</span>
+              </a>
+            </div>
           </div>
         </a-spin>
       </div>
@@ -109,16 +136,26 @@ import request from "@/utils/request";
 
 export default {
   name: "sideContent",
+  props: {
+    notice: {
+      type: String,
+      default: "欢迎来到Simple Blog",
+    },
+  },
   data() {
     return {
       noticeLoading: false,
       listLoading: true,
       linkLoading: false,
       blogList: [],
+      links: [],
+      role: 0,
+      pageNum: 1,
     };
   },
   mounted() {
     this.getHotList();
+    this.getLinks();
   },
   filters: {
     title: function (value) {
@@ -131,13 +168,29 @@ export default {
   },
   methods: {
     getHotList() {
+      this.role += 360;
+      this.listLoading = true;
       request({
-        url: "/blog/hot",
+        url: `/blog/hot/${this.pageNum}`,
+        method: "post",
+      }).then((res) => {
+        if (res.data.data.length) {
+          this.blogList = res.data.data;
+          this.listLoading = false;
+          this.pageNum = (this.pageNum % 5) + 1;
+        } else {
+          this.pageNum = 1;
+          this.getHotList();
+        }
+      });
+    },
+    getLinks() {
+      request({
+        url: "/link",
         method: "post",
       }).then((res) => {
         if (res.data.data) {
-          this.blogList = res.data.data;
-          this.listLoading = false;
+          this.links = res.data.data;
         }
       });
     },

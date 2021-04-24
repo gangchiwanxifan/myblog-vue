@@ -28,6 +28,7 @@
             >
               <a-icon type="edit" theme="filled" /> 回复
             </a>
+            <a @click="report(comment)"> <a-icon type="warning" />举报 </a>
             <a-popconfirm
               v-if="comment.commentUserId == userId"
               okText="确认"
@@ -98,6 +99,35 @@ export default {
         } else {
           this.$message.error("error");
         }
+      });
+    },
+    report(record) {
+      const comment = {
+        commentId: record.commentId,
+        reported: ++record.reported,
+      };
+      const _this = this;
+      this.$confirm({
+        title: "确定举报该评论?",
+        okText: "Yes",
+        okType: "danger",
+        cancelText: "No",
+        onOk() {
+          request({
+            url: "/comment/update",
+            method: "post",
+            data: comment,
+          }).then((res) => {
+            if (res.data.data) {
+              _this.$message.success("举报成功,等待管理员核实");
+            } else {
+              _this.$message.error("操作失败");
+            }
+          });
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
       });
     },
   },

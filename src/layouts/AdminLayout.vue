@@ -7,8 +7,13 @@
         collapsible
         width="256px"
       >
-        <div class="logo">
-          <img src="~@/assets/spring.svg" class="svg-logo" alt="logo" />
+        <div class="logo" @click="$router.push({ path: '/' })">
+          <img
+            style="cursor: pointer"
+            src="~@/assets/spring.svg"
+            class="svg-logo"
+            alt="logo"
+          />
           <h1>Simple Blog</h1>
         </div>
         <SiderMenu />
