@@ -19,6 +19,7 @@ const routes = [
   {
     path: "/admin",
     component: () => import("@/layouts/AdminLayout"),
+    meta: { authority: ["admin"] },
     children: [...admin],
   },
   {
@@ -40,6 +41,10 @@ const routes = [
         component: () => import("@/views/test/Test3"),
       },
     ],
+  },
+  {
+    path: "/403",
+    component: () => import("@/views/exception/403"),
   },
   {
     path: "*",

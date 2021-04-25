@@ -5,8 +5,8 @@
         <a-col :span="16">
           <!-- <a-spin :spinning="loading" size="large"> -->
           <a-carousel autoplay style="padding: 12px 0px; min-height: 30vh">
-            <img :src="config.swiper1" alt="图片加载失败" />
-            <img :src="config.swiper2" alt="图片加载失败" />
+            <img :src="config.swiper1" alt="别急！等一下" />
+            <img :src="config.swiper2" alt="别急！等一下" />
           </a-carousel>
           <!-- </a-spin> -->
           <a-card
@@ -111,6 +111,14 @@
         </a-col>
       </a-row>
     </div>
+    <a-back-top>
+      <div class="float-nav">
+        <div @click.stop="test" class="item">
+          <span>问题</span>
+          <span>反馈</span>
+        </div>
+      </div>
+    </a-back-top>
   </div>
 </template>
 
@@ -204,11 +212,14 @@ export default {
         }
       });
     },
+    test() {
+      console.log(123);
+    },
   },
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .container-index {
   background-color: #fff;
   /* border-top: 1px solid #e7e7e7; */
@@ -231,5 +242,34 @@ export default {
 .load-text {
   color: #99a2aa;
   font-size: 12px;
+}
+
+.float-nav {
+  // position: fixed;
+  // left: 6px;
+  // bottom: 100px;
+  .item {
+    background: #f7f9fa;
+    border: 1px solid #e5e9ef;
+    border-radius: 3px;
+    width: 45px;
+    height: 45px;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+    color: #999;
+    text-align: center;
+    font-size: 12px;
+    &:hover {
+      background: #fa541c;
+      color: #fff;
+    }
+    span {
+      display: block;
+      &:first-child {
+        margin-top: 4px;
+      }
+    }
+  }
 }
 </style>

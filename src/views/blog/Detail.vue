@@ -1,6 +1,6 @@
 <template>
   <div class="page-container" @click="closeSel">
-    <div class="_3Pnjry">
+    <div class="_3Pnjry" v-if="loginStatus">
       <div v-if="isFavorite" @click="cancelFavorite" class="_1pUUKr">
         <div class="_2VdqdF" style="background-color: #00a1d6; color: #fff">
           <a-icon type="like" theme="filled" />
@@ -19,12 +19,14 @@
     <a-spin :spinning="blogLoading" size="large">
       <a-card class="page-container-card" :bordered="false">
         <div class="page-title">
-          <a class="favorite" v-if="!isFavorite" @click="addFavorite">
-            <a-icon type="plus" /> 收藏
-          </a>
-          <a class="favorite" v-else @click="cancelFavorite">
-            <a-icon type="check" /> 已收藏
-          </a>
+          <template v-if="loginStatus">
+            <a class="favorite" v-if="!isFavorite" @click="addFavorite">
+              <a-icon type="plus" /> 收藏
+            </a>
+            <a class="favorite" v-else @click="cancelFavorite">
+              <a-icon type="check" /> 已收藏
+            </a>
+          </template>
           <h1 class="page-title-blog">
             <span>{{ blogDetail.blogTitle }}</span>
           </h1>
@@ -87,7 +89,7 @@
               <div class="follow-user">{{ blogDetail.nickname }}</div>
               <div class="follow-info">{{ blogDetail.introduction }}</div>
             </div>
-            <div class="follow-btn">
+            <div class="follow-btn" v-if="loginStatus">
               <a-button
                 class="follow"
                 type="primary"
@@ -120,7 +122,7 @@
     <!-- 评论部分 -->
     <a-card class="comment-card" :bordered="false">
       <h2>评论</h2>
-      <a-comment>
+      <a-comment v-if="loginStatus">
         <img class="comment-avatar" slot="avatar" :src="userInfo.avatar" />
         <div slot="content">
           <a-textarea
@@ -167,7 +169,7 @@
         </div>
       </a-comment>
       <a-spin :spinning="commentLoading">
-        <div>
+        <div v-if="loginStatus">
           <div v-if="!hasComment" class="no-reply">看看下面~来抢沙发吧</div>
           <div v-else>
             <blog-comments
@@ -177,6 +179,9 @@
             />
             <div class="no-reply">没有更多评论</div>
           </div>
+        </div>
+        <div v-else>
+          <div class="no-reply">登录后才能使用评论功能噢~</div>
         </div>
       </a-spin>
     </a-card>
@@ -275,6 +280,9 @@ export default {
     },
     blogId: function () {
       return this.$route.params.id;
+    },
+    loginStatus() {
+      return this.$store.state.user.loginStatus;
     },
     hasComment: function () {
       if (this.comments.length) {
@@ -408,7 +416,11 @@ export default {
       this.value = "";
     },
     showModal() {
-      this.visible = true;
+      if (this.loginStatus) {
+        this.visible = true;
+      } else {
+        this.$message.info("请先登录~");
+      }
     },
     select(index) {
       this.choice = index;

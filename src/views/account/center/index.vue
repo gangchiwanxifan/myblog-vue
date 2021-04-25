@@ -24,7 +24,7 @@
               <span class="h-sign"> {{ userInfo.introduction }} </span>
             </div>
           </div>
-          <div class="h-side">
+          <div class="h-side" v-if="loginStatus">
             <div class="h-side-follow">
               <a-button
                 v-if="!isFollow"
@@ -161,6 +161,9 @@ export default {
     },
     userId() {
       return this.$store.state.user.userInfo.userId;
+    },
+    loginStatus() {
+      return this.$store.state.user.loginStatus;
     },
     follow() {
       const follow = {

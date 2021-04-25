@@ -70,23 +70,43 @@ export default {
     this.getHomePage();
   },
   methods: {
+    beforeUpload(file) {
+      const isJpgOrPng =
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/webp";
+      if (!isJpgOrPng) {
+        this.$message.error("请上传图片文件! (jpg/pbg/webp)", 3);
+      }
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        this.$message.info("限制上传图片大小为2MB", 3);
+      }
+      return isJpgOrPng && isLt2M;
+    },
     // 将图片上传，返回地址替换到md中
     imgAdd(pos, $file) {
       let file = new FormData();
-      file.append("file", $file);
-      request({
-        url: "/api/upload",
-        method: "post",
-        data: file,
-      }).then((res) => {
-        if (res.data.data) {
-          // console.log(res);
-          this.$refs.md.$img2Url(pos, res.data.data);
-        } else {
-          this.$message.error("图片上传出错");
-          // console.log(res);
-        }
-      });
+      if (this.beforeUpload(file)) {
+        file.append("file", $file);
+        request({
+          url: "/api/upload",
+          method: "post",
+          data: file,
+        }).then((res) => {
+          if (res.data.data) {
+            // console.log(res);
+            this.$refs.md.$img2Url(pos, res.data.data);
+          } else {
+            this.$message.error("图片上传出错");
+            // console.log(res);
+          }
+        });
+      } else {
+        // console.log(pos);
+        // console.log($file);
+        this.$refs.md.$refs.toolbar_left.$imgDelByFilename($file.name);
+      }
     },
     // 获取用户主页
     getHomePage() {

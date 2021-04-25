@@ -7,6 +7,7 @@ export default [
   {
     path: "/settings",
     name: "settings",
+    meta: { authority: ["user", "admin"] },
     component: () => import("@/views/account/settings"),
     children: [
       {

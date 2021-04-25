@@ -44,6 +44,7 @@
               <div class="channel-info-right">
                 <div class="edit-btn-group">
                   <a-button
+                    v-if="loginStatus"
                     size="large"
                     shape="round"
                     style="color: #42c02e; border-color: #42c02e"
@@ -190,6 +191,9 @@ export default {
     // console.log(this.data);
   },
   computed: {
+    loginStatus() {
+      return this.$store.state.user.loginStatus;
+    },
     currentChannel: function () {
       if (this.data) {
         const channel = this.data.find(

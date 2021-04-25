@@ -113,6 +113,7 @@ export default {
       loading: true,
       data: [],
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
+      keyword: "",
     };
   },
   mounted() {
