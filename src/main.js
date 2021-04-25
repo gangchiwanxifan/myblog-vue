@@ -12,7 +12,7 @@ import "mavon-editor/dist/css/index.css";
 import "./permission"; // permission control
 
 Vue.config.productionTip = false;
-// Vue.config.devtools = false;
+Vue.config.devtools = false;
 
 Vue.use(Antd);
 Vue.use(VueCropper);

@@ -113,7 +113,7 @@
     </div>
     <a-back-top>
       <div class="float-nav">
-        <div @click.stop="test" class="item">
+        <div @click.stop="$router.push({ path: '/blog/1' })" class="item">
           <span>问题</span>
           <span>反馈</span>
         </div>

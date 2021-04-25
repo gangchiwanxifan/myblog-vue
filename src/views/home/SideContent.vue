@@ -179,8 +179,10 @@ export default {
           this.listLoading = false;
           this.pageNum = (this.pageNum % 5) + 1;
         } else {
-          this.pageNum = 1;
-          this.getHotList();
+          if (this.pageNum != 1) {
+            this.pageNum = 1;
+            this.getHotList();
+          }
         }
       });
     },

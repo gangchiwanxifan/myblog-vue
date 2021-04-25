@@ -115,7 +115,9 @@ export default {
         data: { userId: this.userId },
       }).then((res) => {
         if (res.data.data) {
-          this.content = res.data.data.pageContent;
+          this.content = res.data.data.pageContent
+            ? res.data.data.pageContent
+            : "";
           this.spinning = false;
         } else {
           this.$message.error("获取主页信息失败", 1);
