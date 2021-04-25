@@ -12,7 +12,9 @@
             :style="{ border: '0', width: '100%' }"
             :selectedKeys="selectedKeys"
           >
-            <a-menu-item key="1" @click="updateMenu('1')">文章管理</a-menu-item>
+            <a-menu-item key="1" @click="updateMenu('1')">{{
+              userId == homeId ? "文章管理" : "TA的文章"
+            }}</a-menu-item>
             <a-menu-item key="2" @click="updateMenu('2')">收藏文章</a-menu-item>
           </a-menu>
         </div>
