@@ -329,7 +329,7 @@ export default {
     // 将图片上传，返回地址替换到md中
     imgAdd(pos, $file) {
       let file = new FormData();
-      if (this.beforeUpload(file)) {
+      if (this.beforeUpload($file)) {
         file.append("file", $file);
         request({
           url: "/api/upload",
@@ -337,16 +337,13 @@ export default {
           data: file,
         }).then((res) => {
           if (res.data.data) {
-            // console.log(res);
             this.$refs.md.$img2Url(pos, res.data.data);
           } else {
             this.$message.error("图片上传出错");
-            // console.log(res);
+            this.$refs.md.$refs.toolbar_left.$imgDelByFilename($file.name);
           }
         });
       } else {
-        // console.log(pos);
-        // console.log($file);
         this.$refs.md.$refs.toolbar_left.$imgDelByFilename($file.name);
       }
     },

@@ -174,8 +174,7 @@ export default {
         this.selectedKeys = [this.catagory[0].catagoryId];
       }
     },
-    homeId: function (val) {
-      console.log(val);
+    homeId: function () {
       this.$router.go(0);
     },
   },

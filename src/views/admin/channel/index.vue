@@ -312,9 +312,6 @@ export default {
             }
           });
         },
-        onCancel() {
-          console.log("Cancel");
-        },
       });
     },
   },

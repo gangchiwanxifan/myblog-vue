@@ -212,9 +212,6 @@ export default {
         }
       });
     },
-    test() {
-      console.log(123);
-    },
   },
 };
 </script>

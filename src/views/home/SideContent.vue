@@ -194,10 +194,6 @@ export default {
         }
       });
     },
-    test(path) {
-      // this.$route.push({ path: `/blog/${item.blogId}` })
-      console.log(path);
-    },
   },
 };
 </script>

@@ -12,7 +12,6 @@ router.beforeEach((to, from, next) => {
     NProgress.start();
   }
   const record = findLast(to.matched, (record) => record.meta.authority);
-  console.log(record);
   if (record && !check(record.meta.authority)) {
     notification.error({
       message: "403",

@@ -129,7 +129,7 @@ export default {
           this.$message.success("上传成功");
           this.img = url;
         } else {
-          console.log("请求错误，很烦~");
+          this.$message.error("上传失败");
         }
       });
     },
@@ -151,7 +151,7 @@ export default {
               this.$store.dispatch("fetchUserInfo", user.userId);
               this.$message.success("更新成功", 1);
             } else {
-              console.log("请求错误，很烦~");
+              this.$message.error("上传失败");
             }
           });
         }

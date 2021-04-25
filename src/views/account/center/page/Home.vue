@@ -127,8 +127,7 @@ export default {
     },
   },
   watch: {
-    homeId: function (val) {
-      console.log(val);
+    homeId: function () {
       this.$router.go(0);
     },
   },

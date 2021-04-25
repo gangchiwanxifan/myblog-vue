@@ -187,9 +187,6 @@ export default {
             }
           });
         },
-        onCancel() {
-          console.log("Cancel");
-        },
       });
     },
     deleteBlog(record) {
@@ -218,9 +215,6 @@ export default {
               _this.loading = false;
             }
           });
-        },
-        onCancel() {
-          console.log("Cancel");
         },
       });
     },

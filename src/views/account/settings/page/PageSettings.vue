@@ -78,6 +78,7 @@ export default {
       if (!isJpgOrPng) {
         this.$message.error("请上传图片文件! (jpg/pbg/webp)", 3);
       }
+      // console.log(file.size);
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
         this.$message.info("限制上传图片大小为2MB", 3);
@@ -87,7 +88,8 @@ export default {
     // 将图片上传，返回地址替换到md中
     imgAdd(pos, $file) {
       let file = new FormData();
-      if (this.beforeUpload(file)) {
+      // console.log($file);
+      if (this.beforeUpload($file)) {
         file.append("file", $file);
         request({
           url: "/api/upload",
@@ -95,16 +97,13 @@ export default {
           data: file,
         }).then((res) => {
           if (res.data.data) {
-            // console.log(res);
             this.$refs.md.$img2Url(pos, res.data.data);
           } else {
             this.$message.error("图片上传出错");
-            // console.log(res);
+            this.$refs.md.$refs.toolbar_left.$imgDelByFilename($file.name);
           }
         });
       } else {
-        // console.log(pos);
-        // console.log($file);
         this.$refs.md.$refs.toolbar_left.$imgDelByFilename($file.name);
       }
     },
