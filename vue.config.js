@@ -22,6 +22,7 @@ module.exports = {
   //   svgRule.use("vue-svg-loader").loader("vue-svg-loader");
   // },
   devServer: {
+    disableHostCheck: true,
     // proxy: "http://127.0.0.1:9100",
     proxy: {
       "/api": {

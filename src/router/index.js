@@ -35,6 +35,10 @@ const routes = [
     ],
   },
   {
+    path: "/test",
+    component: () => import("@/views/test"),
+  },
+  {
     path: "/403",
     component: () => import("@/views/exception/403"),
   },

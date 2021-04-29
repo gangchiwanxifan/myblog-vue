@@ -374,8 +374,10 @@ export default {
           if (res.data.data) {
             if (isDraft) {
               this.$message.success("保存成功");
+              this.$router.push("/blog/draft");
             } else {
               this.$message.success("发布成功");
+              this.$router.push("/");
             }
             this.blog = {
               title: "",
@@ -445,7 +447,11 @@ export default {
         }).then((res) => {
           if (res.data.data) {
             this.$message.success("保存成功");
-            this.$router.push({ path: "/" });
+            if (status == 0) {
+              this.$router.push({ path: `/blog/${this.editId}` });
+            } else {
+              this.$router.push({ path: "/blog/draft" });
+            }
           } else {
             this.$message.error("发生未知错误");
           }

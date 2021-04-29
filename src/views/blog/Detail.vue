@@ -203,6 +203,9 @@
             <span><icon-font type="icon-lingshi" /> {{ item }}</span>
           </div>
         </div>
+        <a-spin v-if="payMethod == 1" :spinning="qrLoading">
+          <img :src="qrSrc" class="pay-img" />
+        </a-spin>
         <div class="choose-method">选择支付方式</div>
         <div class="method-btn-group">
           <a-tooltip placement="top">
@@ -213,23 +216,38 @@
               <icon-font type="icon-zhifu" /> <span>微信支付</span>
             </div>
           </a-tooltip>
-          <a-tooltip placement="top">
+          <!-- <a-tooltip placement="top">
             <template slot="title">
               <span>网站暂时不支持支付宝</span>
             </template>
             <div class="pay-btn">
               <icon-font type="icon-umidd17" /><span>支付宝</span>
             </div>
-          </a-tooltip>
-          <div class="pay-btn">
+          </a-tooltip> -->
+          <div
+            class="pay-btn"
+            :class="{ selected: payMethod == 1 }"
+            @click="selectMethod(1)"
+          >
+            <icon-font type="icon-umidd17" /><span>支付宝</span>
+          </div>
+          <div
+            class="pay-btn"
+            :class="{ selected: payMethod == 0 }"
+            @click="selectMethod(0)"
+          >
             <icon-font type="icon-jinbi" /><span>余额支付</span>
           </div>
         </div>
       </div>
       <div style="display: flex; justify-content: center; align-items: center">
-        <a-button class="handle-btn" type="primary" @click="handlePay"
-          ><span>确认支付 ￥{{ money[choice] }}</span></a-button
-        >
+        <a-button
+          v-if="payMethod == 0"
+          class="handle-btn"
+          type="primary"
+          @click="handlePay"
+          ><span>确认支付 ￥{{ money[choice] }}</span>
+        </a-button>
       </div>
     </a-modal>
   </div>
@@ -259,8 +277,11 @@ export default {
       visible: false,
       money: [2, 5, 10, 20, 50, 100],
       choice: 0,
+      payMethod: 0,
       isFavorite: false,
       isFollow: false,
+      qrSrc: "",
+      qrLoading: true,
     };
   },
   mounted() {
@@ -307,6 +328,12 @@ export default {
     },
   },
   methods: {
+    selectMethod(method) {
+      this.payMethod = method;
+      if (method == 1) {
+        this.getQrCode();
+      }
+    },
     getBlog(blogId) {
       // this.blogLoading = true;
       request({
@@ -416,8 +443,14 @@ export default {
       this.value = "";
     },
     showModal() {
-      if (this.loginStatus) {
+      if (
+        this.loginStatus &&
+        this.userInfo.userId != this.blogDetail.blogAuthorId
+      ) {
+        this.payMethod = 0;
         this.visible = true;
+      } else if (this.loginStatus) {
+        this.$message.info("不能打赏自己的文章~");
       } else {
         this.$message.info("请先登录~");
       }
@@ -439,6 +472,7 @@ export default {
         },
       };
       this.$message.loading("处理中，请稍等...", 0);
+      var _this = this;
       request({
         url: "/user/reward",
         method: "post",
@@ -451,6 +485,8 @@ export default {
           const user = this.userInfo;
           user.balance = user.balance - this.money[this.choice];
           this.$store.commit("SET_USER_INFO", user);
+          // 保存记录
+          _this.saveOrder();
           this.visible = false;
         } else if (res.data.data === false) {
           // console.log(res.data.data);
@@ -461,6 +497,26 @@ export default {
           this.$message.error("出现未知错误");
           this.visible = false;
         }
+      });
+    },
+    saveOrder() {
+      const data = {
+        orderUserId: this.userInfo.userId,
+        orderTargetId: this.blogDetail.blogAuthorId,
+        orderPrice: this.money[this.choice],
+        orderBlogId: this.blogDetail.blogId,
+        orderBlogTitle: this.blogDetail.blogTitle,
+      };
+      // console.log(data);
+      request({
+        url: "/order/save",
+        method: "post",
+        data: data,
+        // data: {
+        //   orderUserId: this.userInfo.userId,
+        //   orderTargetId: this.blogDetail.blogAuthorId,
+        //   orderPrice: this.money[this.choice],
+        // },
       });
     },
     // 点赞收藏
@@ -554,6 +610,33 @@ export default {
           this.$message.error("error");
         }
       });
+    },
+    getQrCode() {
+      this.qrLoading = true;
+      request({
+        url: "/alipay/pay",
+        method: "post",
+        responseType: "blob",
+        data: {
+          userId: this.userInfo.userId,
+          targetId: this.blogDetail.blogAuthorId,
+          price: this.money[this.choice],
+        },
+      }).then((res) => {
+        if (res.data) {
+          let blob = new Blob([res.data], { type: "image/png" });
+          let url = window.URL.createObjectURL(blob);
+          this.qrSrc = url;
+          this.qrLoading = false;
+        }
+      });
+    },
+  },
+  watch: {
+    choice: function () {
+      if (this.payMethod == 1) {
+        this.getQrCode();
+      }
     },
   },
 };
@@ -798,10 +881,6 @@ export default {
       font-style: italic;
     }
   }
-  .selected {
-    border-color: #00a1d6;
-    color: #00a1d6;
-  }
   .choose-method {
     font-size: 15px;
     margin: 12px 0;
@@ -828,13 +907,24 @@ export default {
       margin-right: 0;
       cursor: pointer;
       opacity: 1;
-      border: 1px solid #00a1d6;
+      // border: 1px solid #00a1d6;
+    }
+    &:nth-child(2) {
+      // margin-right: 0;
+      cursor: pointer;
+      opacity: 1;
+      // border: 1px solid #00a1d6;
     }
     & > span {
       font-size: 16px;
       font-style: normal;
       margin-left: 4px;
     }
+  }
+  .selected {
+    border: 1px solid #00a1d6;
+    border-color: #00a1d6;
+    color: #00a1d6;
   }
 }
 .handle-btn {
@@ -845,5 +935,8 @@ export default {
   margin-bottom: 20px;
   background-color: #00a1d6;
   border-color: #00a1d6;
+}
+.pay-img {
+  width: 150px;
 }
 </style>

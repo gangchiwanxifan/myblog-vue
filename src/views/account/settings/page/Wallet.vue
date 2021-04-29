@@ -24,6 +24,45 @@
       </div>
     </div>
 
+    <a-table
+      :columns="columns"
+      :data-source="orders"
+      rowKey="orderId"
+      :loading="loading"
+      :pagination="{ defaultPageSize: 4 }"
+      :style="{ marginTop: '20px' }"
+    >
+      <span slot="payType"> 赞赏 </span>
+
+      <span slot="action" slot-scope="record">
+        <template v-if="record.orderUserId == userInfo.userId">
+          你打赏了
+          <a @click="$router.push({ path: `/center/${record.orderTargetId}` })">
+            {{ record.orderTargetName }}
+          </a>
+          的文章
+        </template>
+        <template v-else>
+          <a @click="$router.push({ path: `/center/${record.orderUserId}` })">
+            {{ record.orderUserName }}
+          </a>
+          打赏了你的文章
+        </template>
+        <a @click="$router.push({ path: `/blog/${record.orderBlogId}` })">
+          《{{ record.orderBlogTitle }}》
+        </a>
+      </span>
+
+      <span slot="orderPrice" slot-scope="record">
+        {{ record.orderUserId == userInfo.userId ? "-" : "" }} ￥
+        {{ record.orderPrice }}.00
+      </span>
+
+      <span slot="orderType" slot-scope="type">
+        {{ payMethods[type] }}
+      </span>
+    </a-table>
+
     <a-modal v-model="visible" :width="640" :footer="null">
       <div class="charge-modal-container">
         <div class="title">
@@ -78,6 +117,41 @@
 <script>
 import request from "@/utils/request";
 
+const payMethods = ["支付宝", "余额支付", "微信支付"];
+
+const columns = [
+  {
+    title: "时间",
+    dataIndex: "createTime",
+    key: "createTime",
+    width: "20%",
+  },
+  {
+    title: "类型",
+    key: "payType",
+    scopedSlots: { customRender: "payType" },
+  },
+  {
+    title: "详情",
+    key: "action",
+    scopedSlots: { customRender: "action" },
+    ellipsis: true,
+    width: "40%",
+  },
+  {
+    title: "金额",
+    // dataIndex: "orderPrice",
+    key: "orderPrice",
+    scopedSlots: { customRender: "orderPrice" },
+  },
+  {
+    title: "支付方式",
+    dataIndex: "orderType",
+    key: "orderType",
+    scopedSlots: { customRender: "orderType" },
+  },
+];
+
 export default {
   data() {
     this.$message.config({
@@ -87,7 +161,14 @@ export default {
       visible: false,
       money: [2, 5, 10, 20, 50, 100],
       choice: 0,
+      orders: [],
+      columns,
+      payMethods,
+      loading: true,
     };
+  },
+  mounted() {
+    this.getOrder();
   },
   computed: {
     userInfo() {
@@ -98,6 +179,19 @@ export default {
     },
   },
   methods: {
+    getOrder() {
+      this.loading = true;
+      request({
+        url: "/order/list",
+        method: "get",
+        params: { userId: this.userInfo.userId },
+      }).then((res) => {
+        if (res.data.data) {
+          this.orders = res.data.data;
+          this.loading = false;
+        }
+      });
+    },
     warn() {
       this.$message.warn("当前不支持提现~", 2);
     },
@@ -139,6 +233,7 @@ export default {
   // background-color: rgb(201, 212, 209);
   margin: 30px auto;
   display: flex;
+  flex-wrap: wrap;
   .user {
     padding-top: 40px;
     padding-bottom: 40px;
