@@ -22,18 +22,18 @@ module.exports = {
   //   svgRule.use("vue-svg-loader").loader("vue-svg-loader");
   // },
   devServer: {
-    proxy: "http://127.0.0.1:9100",
-    // proxy: {
-    //   "/api": {
-    //     target: "http://127.0.0.1:9100",
-    //     pathRewrite: {
-    //       "^/api": "/"
-    //     },
-    //     // changeOrigin: true
-    //   }
-    //   // '/foo': {
-    //   //   target: '<other_url>'
-    //   // }
-    // }
+    // proxy: "http://127.0.0.1:9100",
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:9100",
+        pathRewrite: {
+          "^/api": "/",
+        },
+        // changeOrigin: true
+      },
+      //   // '/foo': {
+      //   //   target: '<other_url>'
+      //   // }
+    },
   },
 };

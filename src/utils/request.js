@@ -1,6 +1,8 @@
 import axios from "axios";
 import { notification } from "ant-design-vue";
 
+axios.defaults.baseURL = "/api";
+
 function request(options) {
   return axios(options)
     .then((res) => {
