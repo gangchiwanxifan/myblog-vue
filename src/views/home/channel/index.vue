@@ -134,7 +134,11 @@
                   </div>
                   <!--action-->
                   <template slot="actions">
-                    <span>
+                    <span
+                      @click="
+                        $router.push({ path: `/center/${item.blogAuthorId}` })
+                      "
+                    >
                       <a-icon type="user" style="margin-right: 8px" />
                       {{ item.nickname }}
                     </span>
@@ -184,9 +188,13 @@ export default {
         pageSize: 5,
       },
       tagColor: ["pink", "green", "cyan", "blue", "purple", "orange", "red"],
+      param: "",
     };
   },
   mounted() {
+    if (this.$route.query.channelId) {
+      this.param = this.$route.query.channelId;
+    }
     this.getList();
     // console.log(this.data);
   },
@@ -232,6 +240,9 @@ export default {
       }).then((res) => {
         this.data = res.data.data;
         this.channelLoading = false;
+        if (this.param) {
+          this.selectedKeys = [parseInt(this.param)];
+        }
         // console.log(this.data);
         // this.loading = false;
       });
@@ -254,7 +265,7 @@ export default {
   },
   watch: {
     data() {
-      if (this.data) {
+      if (this.data && !this.param) {
         this.selectedKeys = [this.data[0].channelId];
       }
     },

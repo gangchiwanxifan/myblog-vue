@@ -18,8 +18,12 @@
         </div>
         <div class="page-notice-right">
           <a-spin :spinning="loading">
-            <a-list :pagination="pagination">
-              <a-list-item :key="index" v-for="(item, index) in data">
+            <a-list :pagination="pagination" :data-source="data">
+              <a-list-item
+                slot="renderItem"
+                key="item.noticeId"
+                slot-scope="item"
+              >
                 <a
                   v-if="selectedKeys[0] == 0"
                   slot="actions"
@@ -79,7 +83,7 @@ export default {
         // onChange: () => {
         //   document.documentElement.scrollTop = 200;
         // },
-        pageSize: 7,
+        pageSize: 10,
         hideOnSinglePage: true,
       },
       loading: true,
@@ -139,6 +143,9 @@ export default {
         if (res.data.data) {
           this.$message.success("success!");
           this.data = this.data.filter((notice) => notice.noticeId != noticeId);
+          if (this.data.length <= 0) {
+            this.$emit("hasChecked");
+          }
         }
       });
     },

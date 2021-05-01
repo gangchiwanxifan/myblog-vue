@@ -26,7 +26,8 @@ module.exports = {
     // proxy: "http://127.0.0.1:9100",
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:9100",
+        // target: "http://127.0.0.1:9100",
+        target: "http://39293d8c66.qicp.vip",
         pathRewrite: {
           "^/api": "/",
         },

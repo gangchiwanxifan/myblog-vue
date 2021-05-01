@@ -98,7 +98,11 @@
                 </div>
                 <!--action-->
                 <template slot="actions">
-                  <span>
+                  <span
+                    @click="
+                      $router.push({ path: `/center/${item.blogAuthorId}` })
+                    "
+                  >
                     <a-icon type="user" style="margin-right: 8px" />
                     {{ item.nickname }}
                   </span>

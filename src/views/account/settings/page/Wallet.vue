@@ -169,6 +169,7 @@ export default {
   },
   mounted() {
     this.getOrder();
+    this.$store.dispatch("fetchUserInfo", this.userInfo.userId);
   },
   computed: {
     userInfo() {

@@ -3,12 +3,20 @@
     <div style="max-width: 1000px; margin: 0 auto">
       <a-row :gutter="24">
         <a-col :span="16">
-          <!-- <a-spin :spinning="loading" size="large"> -->
-          <a-carousel autoplay style="padding: 12px 0px; min-height: 30vh">
-            <img :src="config.swiper1" alt="别急！等一下" />
-            <img :src="config.swiper2" alt="别急！等一下" />
-          </a-carousel>
-          <!-- </a-spin> -->
+          <a-spin :spinning="loading" size="large">
+            <a-carousel
+              class="lunbotu"
+              autoplay
+              style="padding: 12px 0px; min-height: 30vh"
+            >
+              <a :href="config.swiper1Url" target="_blank">
+                <img :src="config.swiper1" alt="别急！等一下" />
+              </a>
+              <a :href="config.swiper2Url" target="_blank">
+                <img :src="config.swiper2" alt="别急！等一下" />
+              </a>
+            </a-carousel>
+          </a-spin>
           <a-card
             :bordered="false"
             :bodyStyle="{ padding: '12px 0px', minHeight: '60vh' }"
@@ -34,7 +42,7 @@
                       >{{ item.blogTitle }}</a
                     >
                     <template slot="description">
-                      <span>
+                      <span v-if="item.blogTags">
                         <a-tag
                           v-for="tag in item.blogTags.split(',')"
                           :key="tag"
@@ -239,6 +247,12 @@ export default {
 .load-text {
   color: #99a2aa;
   font-size: 12px;
+}
+.lunbotu {
+  img {
+    width: 100%;
+    max-height: 285px;
+  }
 }
 
 .float-nav {

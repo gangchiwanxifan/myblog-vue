@@ -18,6 +18,7 @@ export default {
   },
   mounted() {
     this.getData();
+    this.getCallBack();
   },
   methods: {
     getData() {
@@ -34,6 +35,19 @@ export default {
         let blob = new Blob([res.data], { type: "image/png" });
         let url = window.URL.createObjectURL(blob);
         this.imgSrc = url;
+      });
+    },
+    getCallBack() {
+      const payVo = {
+        userId: 1,
+        timestamp: 1619765915503,
+      };
+      request({
+        url: "/order/callback",
+        method: "post",
+        data: payVo,
+      }).then((res) => {
+        console.log(res.data);
       });
     },
   },

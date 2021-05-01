@@ -6,7 +6,7 @@
           <a-upload
             name="file"
             :before-upload="beforeUpload"
-            action="/api/upload"
+            action="/api/api/upload"
             @change="handleChange1"
             :multiple="false"
           >
@@ -18,12 +18,15 @@
             </div>
           </a-upload>
         </a-form-item>
+        <a-form-item label="目标链接">
+          <a-input v-model="swiper1Url"></a-input>
+        </a-form-item>
         <a-form-item label="轮播图二">
           <!-- @click="$refs.modal.edit(img) -->
           <a-upload
             name="file"
             :before-upload="beforeUpload"
-            action="/api/upload"
+            action="/api/api/upload"
             @change="handleChange2"
             :multiple="false"
           >
@@ -34,6 +37,9 @@
               <img :src="swiper2" />
             </div>
           </a-upload>
+        </a-form-item>
+        <a-form-item label="目标链接">
+          <a-input v-model="swiper2Url"></a-input>
         </a-form-item>
         <a-form-item :wrapperCol="{ offset: 5 }">
           <a-button
@@ -61,6 +67,8 @@ export default {
       loading: true,
       swiper1: "",
       swiper2: "",
+      swiper1Url: "",
+      swiper2Url: "",
     };
   },
   mounted() {
@@ -76,6 +84,8 @@ export default {
         if (res.data.data) {
           this.swiper1 = res.data.data.swiper1;
           this.swiper2 = res.data.data.swiper2;
+          this.swiper1Url = res.data.data.swiper1Url;
+          this.swiper2Url = res.data.data.swiper2Url;
           this.loading = false;
         }
       });
@@ -121,6 +131,8 @@ export default {
         configId: 1,
         swiper1: this.swiper1,
         swiper2: this.swiper2,
+        swiper1Url: this.swiper1Url,
+        swiper2Url: this.swiper2Url,
       };
       this.$message.loading("正在保存", 0);
       request({
@@ -139,6 +151,8 @@ export default {
     reset() {
       this.swiper1 = "/swiper/img1.png";
       this.swiper2 = "/swiper/img2.png";
+      this.swiper1Url = "http://www.baidu.com";
+      this.swiper2Url = "http://www.baidu.com";
       this.save();
     },
   },

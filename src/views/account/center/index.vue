@@ -56,10 +56,17 @@
       :active-tab-key="noTitleKey"
       @tabChange="(key) => onTabChange(key, 'noTitleKey')"
     >
+      <template slot="customRender">
+        消息
+        <a-badge v-if="hasNotice" :dot="true" :offset="[-5, -10]" />
+      </template>
       <home-page v-if="noTitleKey === 'home'"></home-page>
       <article-page v-else-if="noTitleKey === 'blog'"></article-page>
       <catagory-page v-else-if="noTitleKey === 'catagory'"></catagory-page>
-      <notice-page v-else-if="noTitleKey === 'notice'"></notice-page>
+      <notice-page
+        v-else-if="noTitleKey === 'notice'"
+        @hasChecked="hasChecked"
+      ></notice-page>
       <follow-page v-else-if="noTitleKey === 'follow'"></follow-page>
       <fans-page v-else-if="noTitleKey === 'fans'"></fans-page>
       <span slot="tabBarExtraContent">
@@ -122,7 +129,8 @@ const list1 = [
   },
   {
     key: "notice",
-    tab: "消息",
+    // tab: "消息",
+    scopedSlots: { tab: "customRender" },
   },
 ];
 
@@ -144,11 +152,13 @@ export default {
       icon: ["icon-gougouchushou", "icon-nan", "icon-nv1"],
       noTitleKey: "home",
       isFollow: false,
+      hasNotice: false,
     };
   },
   mounted() {
     if (this.homeId == this.userId) {
       this.userInfo = this.$store.state.user.userInfo;
+      this.checkNotice();
     } else {
       this.tabListNoTitle = list2;
       this.getUser();
@@ -238,6 +248,21 @@ export default {
           this.$message.error("error");
         }
       });
+    },
+    checkNotice() {
+      request({
+        url: "/notice/new",
+        method: "get",
+        params: { userId: this.userId },
+      }).then((res) => {
+        // console.log(res);
+        if (res.data.data > 0) {
+          this.hasNotice = true;
+        }
+      });
+    },
+    hasChecked() {
+      this.hasNotice = false;
     },
   },
   watch: {

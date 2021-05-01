@@ -1,28 +1,23 @@
 <template>
   <div style="width: 256px">
-    <a-menu
-      :default-selected-keys="['1']"
-      :default-open-keys="['sub1']"
-      mode="inline"
-      theme="dark"
-    >
-      <a-menu-item key="1" @click="goTo('/admin/dashboard')">
+    <a-menu :selectedKeys="selectedKeys" mode="inline" theme="dark">
+      <a-menu-item key="/admin/dashboard" @click="goTo('/admin/dashboard')">
         <a-icon type="pie-chart" />
-        <span>仪表盘</span>
+        <span>工作台</span>
       </a-menu-item>
-      <a-menu-item key="2" @click="goTo('/admin/blog')">
+      <a-menu-item key="/admin/blog" @click="goTo('/admin/blog')">
         <a-icon type="book" />
         <span>文章管理</span>
       </a-menu-item>
-      <a-menu-item key="3" @click="goTo('/admin/channel')">
+      <a-menu-item key="/admin/channel" @click="goTo('/admin/channel')">
         <a-icon type="container" />
         <span>栏目管理</span>
       </a-menu-item>
-      <a-menu-item key="4" @click="goTo('/admin/comment')">
+      <a-menu-item key="/admin/comment" @click="goTo('/admin/comment')">
         <a-icon type="message" />
         <span>评论管理</span>
       </a-menu-item>
-      <a-menu-item key="5" @click="goTo('/admin/user')">
+      <a-menu-item key="/admin/user" @click="goTo('/admin/user')">
         <a-icon type="team" />
         <span>用户管理</span>
       </a-menu-item>
@@ -30,7 +25,7 @@
         <a-icon type="crown" />
         <span>角色管理</span>
       </a-menu-item> -->
-      <a-menu-item key="7" @click="goTo('/admin/system')">
+      <a-menu-item key="/admin/system" @click="goTo('/admin/system')">
         <a-icon type="setting" />
         <span>系统配置</span>
       </a-menu-item>
@@ -40,11 +35,24 @@
 
 <script>
 export default {
+  data() {
+    return {
+      selectedKeys: [],
+    };
+  },
+  mounted() {
+    this.selectedKeys = [this.$route.path];
+  },
   methods: {
     goTo(path) {
       if (this.$route.path != path) {
         this.$router.push({ path: path });
       }
+    },
+  },
+  watch: {
+    "$route.path": function (val) {
+      this.selectedKeys = [val];
     },
   },
 };

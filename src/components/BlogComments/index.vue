@@ -8,7 +8,11 @@
       <div class="comment-inner">
         <img class="comment-avatar" :src="comment.avatar" />
         <div class="comment-content">
-          <a class="comment-author">{{ comment.nickname }}</a>
+          <a
+            class="comment-author"
+            @click="$router.push({ path: `/center/${comment.commentUserId}` })"
+            >{{ comment.nickname }}
+          </a>
           <p class="comment-detail">
             {{ comment.commentContent }}
           </p>

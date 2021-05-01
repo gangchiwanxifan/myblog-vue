@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    title="修改头像"
+    title="上传图片"
     :visible="visible"
     :maskClosable="false"
     :width="modalWidth"

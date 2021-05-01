@@ -31,7 +31,11 @@
             <span>{{ blogDetail.blogTitle }}</span>
           </h1>
           <div class="page-title-author">
-            <span>
+            <span
+              @click="
+                $router.push({ path: `/center/${blogDetail.blogAuthorId}` })
+              "
+            >
               <a>
                 <img class="title-avatar" :src="blogDetail.avatar" />
                 <span class="item" style="padding: 0 7px">{{
@@ -41,8 +45,15 @@
             </span>
             <span class="item">
               <span
-                >分类：<a>{{ blogDetail.channelName }}</a></span
+                @click="
+                  $router.push({
+                    path: '/channel',
+                    query: { channelId: blogDetail.blogChannelId },
+                  })
+                "
               >
+                分类：<a>{{ blogDetail.channelName }}</a>
+              </span>
             </span>
             <span class="item">浏览：{{ blogDetail.blogViews }}</span>
             <span class="update-time"
@@ -186,7 +197,7 @@
       </a-spin>
     </a-card>
     <!-- 打赏弹窗 -->
-    <a-modal v-model="visible" :width="640" :footer="null">
+    <a-modal v-model="visible" :width="640" :footer="null" @cancel="onCancel">
       <div class="charge-modal-container">
         <div class="title">
           <img :src="blogDetail.avatar" />
@@ -204,7 +215,12 @@
           </div>
         </div>
         <a-spin v-if="payMethod == 1" :spinning="qrLoading">
-          <img :src="qrSrc" class="pay-img" />
+          <div class="pay-img-container">
+            <div class="mask" v-if="timeout" @click="getQrCode()">
+              <a-icon type="reload" />
+            </div>
+            <img :src="qrSrc" class="pay-img" />
+          </div>
         </a-spin>
         <div class="choose-method">选择支付方式</div>
         <div class="method-btn-group">
@@ -282,6 +298,10 @@ export default {
       isFollow: false,
       qrSrc: "",
       qrLoading: true,
+      timestamp: "",
+      stimer: null,
+      count: 1,
+      timeout: true,
     };
   },
   mounted() {
@@ -346,6 +366,7 @@ export default {
           this.blogLoading = false;
           this.checkFavorite();
           this.checkFollow();
+          // console.log(this.blogDetail);
           // console.log(this.blogLoading);
         }
       });
@@ -612,7 +633,9 @@ export default {
       });
     },
     getQrCode() {
+      this.timeout = false;
       this.qrLoading = true;
+      let timestamp = new Date().getTime();
       request({
         url: "/alipay/pay",
         method: "post",
@@ -621,15 +644,54 @@ export default {
           userId: this.userInfo.userId,
           targetId: this.blogDetail.blogAuthorId,
           price: this.money[this.choice],
+          orderType: 0,
+          blogId: this.blogDetail.blogId,
+          timestamp: timestamp,
         },
       }).then((res) => {
         if (res.data) {
           let blob = new Blob([res.data], { type: "image/png" });
           let url = window.URL.createObjectURL(blob);
           this.qrSrc = url;
+          this.timestamp = timestamp;
+          this.payCallBack(timestamp);
           this.qrLoading = false;
         }
       });
+    },
+    payCallBack(timestamp) {
+      var that = this;
+      if (this.stimer) {
+        clearInterval(this.stimer);
+      }
+      this.count = 1;
+      that.stimer = setInterval(function () {
+        if (that.count > 60) {
+          that.timeout = true;
+          that.$message.info("该二维码已失效，请刷新重试~");
+          if (that.stimer) clearInterval(that.stimer);
+        }
+        request({
+          url: "/order/callback",
+          method: "post",
+          data: {
+            userId: that.userInfo.userId,
+            timestamp: timestamp,
+          },
+        }).then((res) => {
+          if (res.data.data > 0) {
+            if (that.stimer) clearInterval(that.stimer);
+            that.$message.success("支付成功~");
+            that.onCancel();
+          } else {
+            that.count++;
+          }
+        });
+      }, 3000);
+    },
+    onCancel() {
+      this.visible = false;
+      if (this.stimer) clearInterval(this.stimer);
     },
   },
   watch: {
@@ -936,7 +998,28 @@ export default {
   background-color: #00a1d6;
   border-color: #00a1d6;
 }
-.pay-img {
-  width: 150px;
+.pay-img-container {
+  position: relative;
+  .pay-img,
+  .mask {
+    width: 150px;
+    height: 150px;
+  }
+  .mask {
+    display: inline-block;
+    opacity: 1;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  i {
+    font-size: 4rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -2rem;
+    margin-top: -2rem;
+    color: #d6d6d6;
+  }
 }
 </style>
