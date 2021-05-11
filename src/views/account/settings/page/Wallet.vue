@@ -32,38 +32,49 @@
       :pagination="{ defaultPageSize: 4 }"
       :style="{ marginTop: '20px' }"
     >
-      <span slot="payType"> 赞赏 </span>
+      <span slot="orderType" slot-scope="type">
+        {{ type == 0 ? "赞赏" : "充值" }}
+      </span>
 
       <span slot="action" slot-scope="record">
-        <template v-if="record.orderUserId == userInfo.userId">
-          你打赏了
-          <a @click="$router.push({ path: `/center/${record.orderTargetId}` })">
-            {{ record.orderTargetName }}
+        <template v-if="record.orderType == 0">
+          <template v-if="record.orderUserId == userInfo.userId">
+            你打赏了
+            <a
+              @click="$router.push({ path: `/center/${record.orderTargetId}` })"
+            >
+              {{ record.orderTargetName }}
+            </a>
+            的文章
+          </template>
+          <template v-else>
+            <a @click="$router.push({ path: `/center/${record.orderUserId}` })">
+              {{ record.orderUserName }}
+            </a>
+            打赏了你的文章
+          </template>
+          <a @click="$router.push({ path: `/blog/${record.orderBlogId}` })">
+            《{{ record.orderBlogTitle }}》
           </a>
-          的文章
         </template>
-        <template v-else>
-          <a @click="$router.push({ path: `/center/${record.orderUserId}` })">
-            {{ record.orderUserName }}
-          </a>
-          打赏了你的文章
-        </template>
-        <a @click="$router.push({ path: `/blog/${record.orderBlogId}` })">
-          《{{ record.orderBlogTitle }}》
-        </a>
+        <template v-else> 充值余额 </template>
       </span>
 
       <span slot="orderPrice" slot-scope="record">
-        {{ record.orderUserId == userInfo.userId ? "-" : "" }} ￥
-        {{ record.orderPrice }}.00
+        {{
+          record.orderUserId == userInfo.userId && record.orderType == 0
+            ? "-"
+            : "+"
+        }}
+        ￥ {{ record.orderPrice }}.00
       </span>
 
-      <span slot="orderType" slot-scope="type">
-        {{ payMethods[type] }}
+      <span slot="orderMethod" slot-scope="method">
+        {{ payMethods[method] }}
       </span>
     </a-table>
 
-    <a-modal v-model="visible" :width="640" :footer="null">
+    <a-modal v-model="visible" :width="640" :footer="null" @cancel="onCancel">
       <div class="charge-modal-container">
         <div class="title">
           <img :src="userInfo.avatar" />
@@ -80,6 +91,15 @@
             <span><icon-font type="icon-lingshi" /> {{ item }}</span>
           </div>
         </div>
+        <!-- 二维码图片 -->
+        <a-spin v-if="payMethod == 1" :spinning="qrLoading">
+          <div class="pay-img-container">
+            <div class="mask" v-if="timeout" @click="getQrCode()">
+              <a-icon type="reload" />
+            </div>
+            <img :src="qrSrc" class="pay-img" />
+          </div>
+        </a-spin>
         <div class="choose-method">选择支付方式</div>
         <div class="method-btn-group">
           <a-tooltip placement="top">
@@ -90,23 +110,38 @@
               <icon-font type="icon-zhifu" /> <span>微信支付</span>
             </div>
           </a-tooltip>
-          <a-tooltip placement="top">
+          <!-- <a-tooltip placement="top">
             <template slot="title">
               <span>网站暂时不支持支付宝</span>
             </template>
             <div class="pay-btn">
               <icon-font type="icon-umidd17" /><span>支付宝</span>
             </div>
-          </a-tooltip>
-          <div class="pay-btn">
-            <icon-font type="icon-F8523125E92F6969F7377D0C42335F33" /><span
-              >无中生有</span
-            >
+          </a-tooltip> -->
+          <div
+            class="pay-btn"
+            :class="{ selected: payMethod == 1 }"
+            @click="selectMethod(1)"
+          >
+            <icon-font type="icon-umidd17" /><span>支付宝</span>
+          </div>
+          <div
+            class="pay-btn"
+            :class="{ selected: payMethod == 0 }"
+            @click="selectMethod(0)"
+          >
+            <icon-font type="icon-F8523125E92F6969F7377D0C42335F33" /><span>
+              其他方式
+            </span>
           </div>
         </div>
       </div>
       <div style="display: flex; justify-content: center; align-items: center">
-        <a-button class="handle-btn" type="primary" @click="handlePay"
+        <a-button
+          v-if="payMethod == 0"
+          class="handle-btn"
+          type="primary"
+          @click="handlePay"
           ><span>确认支付 ￥{{ money[choice] }}</span></a-button
         >
       </div>
@@ -117,7 +152,7 @@
 <script>
 import request from "@/utils/request";
 
-const payMethods = ["支付宝", "余额支付", "微信支付"];
+const payMethods = ["余额支付", "支付宝", "微信支付", "其他方式"];
 
 const columns = [
   {
@@ -128,8 +163,9 @@ const columns = [
   },
   {
     title: "类型",
-    key: "payType",
-    scopedSlots: { customRender: "payType" },
+    key: "orderType",
+    dataIndex: "orderType",
+    scopedSlots: { customRender: "orderType" },
   },
   {
     title: "详情",
@@ -146,9 +182,9 @@ const columns = [
   },
   {
     title: "支付方式",
-    dataIndex: "orderType",
-    key: "orderType",
-    scopedSlots: { customRender: "orderType" },
+    dataIndex: "orderMethod",
+    key: "orderMethod",
+    scopedSlots: { customRender: "orderMethod" },
   },
 ];
 
@@ -165,6 +201,14 @@ export default {
       columns,
       payMethods,
       loading: true,
+      payMethod: 0,
+      // 支付宝所需参数
+      qrSrc: "",
+      qrLoading: true,
+      timestamp: "",
+      stimer: null,
+      count: 1,
+      timeout: true,
     };
   },
   mounted() {
@@ -180,6 +224,12 @@ export default {
     },
   },
   methods: {
+    selectMethod(method) {
+      this.payMethod = method;
+      if (method == 1) {
+        this.getQrCode();
+      }
+    },
     getOrder() {
       this.loading = true;
       request({
@@ -197,6 +247,7 @@ export default {
       this.$message.warn("当前不支持提现~", 2);
     },
     showModal() {
+      this.payMethod = 0;
       this.visible = true;
     },
     select(index) {
@@ -216,6 +267,7 @@ export default {
         if (res.data.data) {
           this.$store.dispatch("fetchUserInfo", user.userId);
           this.$message.success("充值成功", 1);
+          this.saveOrder();
           this.visible = false;
           this.choice = 0;
         } else {
@@ -224,6 +276,95 @@ export default {
           this.visible = false;
         }
       });
+    },
+    saveOrder() {
+      const data = {
+        orderUserId: this.userInfo.userId,
+        orderTargetId: this.userInfo.userId,
+        orderPrice: this.money[this.choice],
+        orderType: 1,
+        orderMethod: 3,
+      };
+      request({
+        url: "/order/save",
+        method: "post",
+        data: data,
+      }).then((res) => {
+        if (res.data.data) {
+          this.getOrder();
+        }
+      });
+    },
+    // 生成支付宝二维码
+    getQrCode() {
+      this.timeout = false;
+      this.qrLoading = true;
+      let timestamp = new Date().getTime();
+      request({
+        url: "/alipay/pay",
+        method: "post",
+        responseType: "blob",
+        data: {
+          userId: this.userInfo.userId,
+          targetId: this.userInfo.userId,
+          price: this.money[this.choice],
+          orderType: 1,
+          orderMethod: 1,
+          timestamp: timestamp,
+        },
+      }).then((res) => {
+        if (res.data) {
+          let blob = new Blob([res.data], { type: "image/png" });
+          let url = window.URL.createObjectURL(blob);
+          this.qrSrc = url;
+          this.timestamp = timestamp;
+          this.payCallBack(timestamp);
+          this.qrLoading = false;
+        }
+      });
+    },
+    payCallBack(timestamp) {
+      var that = this;
+      if (this.stimer) {
+        clearInterval(this.stimer);
+      }
+      this.count = 1;
+      that.stimer = setInterval(function () {
+        if (that.count > 60) {
+          that.timeout = true;
+          that.$message.info("该二维码已失效，请刷新重试~");
+          if (that.stimer) clearInterval(that.stimer);
+        }
+        request({
+          url: "/order/callback",
+          method: "post",
+          data: {
+            userId: that.userInfo.userId,
+            timestamp: timestamp,
+          },
+        }).then((res) => {
+          if (res.data.data > 0) {
+            if (that.stimer) clearInterval(that.stimer);
+            that.$store.dispatch("fetchUserInfo", that.userInfo.userId);
+            that.$message.success("充值成功~");
+            that.getOrder();
+            that.onCancel();
+          } else {
+            that.count++;
+          }
+        });
+      }, 3000);
+    },
+    onCancel() {
+      this.visible = false;
+      if (this.stimer) clearInterval(this.stimer);
+    },
+  },
+  watch: {
+    choice: function () {
+      if (this.payMethod == 1) {
+        this.getQrCode();
+      }
     },
   },
 };
@@ -360,10 +501,6 @@ export default {
       font-style: italic;
     }
   }
-  .selected {
-    border-color: #fa541c;
-    color: #fa541c;
-  }
   .choose-method {
     font-size: 15px;
     margin: 12px 0;
@@ -383,20 +520,30 @@ export default {
     margin-bottom: 12px;
     margin-right: 12px;
     border-radius: 10px;
-    border: 1px dashed #eee;
+    border: 1px solid #eee;
     cursor: not-allowed;
     opacity: 0.5;
     &:nth-child(3) {
       margin-right: 0;
       cursor: pointer;
       opacity: 1;
-      border: 1px solid #fa541c;
+      // border: 1px solid #fa541c;
+    }
+    &:nth-child(2) {
+      // margin-right: 0;
+      cursor: pointer;
+      opacity: 1;
+      // border: 1px solid #00a1d6;
     }
     & > span {
       font-size: 16px;
       font-style: normal;
       margin-left: 4px;
     }
+  }
+  .selected {
+    border-color: #fa541c;
+    color: #fa541c;
   }
 }
 .handle-btn {
@@ -405,5 +552,30 @@ export default {
   font-weight: normal;
   padding: 0px 48px;
   margin-bottom: 20px;
+}
+
+.pay-img-container {
+  position: relative;
+  .pay-img,
+  .mask {
+    width: 150px;
+    height: 150px;
+  }
+  .mask {
+    display: inline-block;
+    opacity: 1;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  i {
+    font-size: 4rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -2rem;
+    margin-top: -2rem;
+    color: #d6d6d6;
+  }
 }
 </style>

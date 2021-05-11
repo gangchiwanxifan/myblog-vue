@@ -644,6 +644,7 @@ export default {
           userId: this.userInfo.userId,
           targetId: this.blogDetail.blogAuthorId,
           price: this.money[this.choice],
+          orderMethod: 1,
           orderType: 0,
           blogId: this.blogDetail.blogId,
           timestamp: timestamp,

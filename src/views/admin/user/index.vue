@@ -42,15 +42,17 @@
         </div>
 
         <span slot="action" slot-scope="text, record, index">
-          <a v-if="record.locked == 0" @click="lock(index, 1, record.userId)">
-            锁定
-          </a>
-          <a v-else @click="lock(index, 0, record.userId)">解锁</a>
-          <a-divider type="vertical" />
-          <a @click="showModal(record)">重置密码</a>
-          <template v-if="currentRole == 2">
+          <template v-if="record.role < 2">
+            <a v-if="record.locked == 0" @click="lock(index, 1, record.userId)">
+              锁定
+            </a>
+            <a v-else @click="lock(index, 0, record.userId)">解锁</a>
             <a-divider type="vertical" />
-            <a @click="changeRole(record, index)">修改权限</a>
+            <a @click="showModal(record)">重置密码</a>
+            <template v-if="currentRole == 2">
+              <a-divider type="vertical" />
+              <a @click="changeRole(record, index)">修改权限</a>
+            </template>
           </template>
         </span>
       </a-table>
